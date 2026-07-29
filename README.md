@@ -6,7 +6,7 @@
 Visible + Query → Florence-2-large-ft → 归一化 bbox → 提交 JSON/ZIP
 ```
 
-当前版本：`v0.1.2`。正式初赛数据没有 bbox，只用于推理，不用于训练。
+当前版本：`v0.2.0`。正式初赛数据没有 bbox，只用于推理，不用于训练。
 
 ## 安装
 
@@ -59,6 +59,10 @@ python -m aic_baseline.cli infer `
 ```
 
 只有完整处理全部 Query 后才允许生成提交 ZIP。
+
+`v0.2.0` 已完成正式 9,555 条 Query 的 Florence-2 RGB-only 全量推理；
+本地输出位于 Git 忽略的 `outputs/florence2_rgb_only_full`，提交前应查看其中的
+`submission_audit.json`。
 
 ## 数据审计
 

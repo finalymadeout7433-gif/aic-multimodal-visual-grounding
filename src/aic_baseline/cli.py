@@ -16,7 +16,7 @@ import yaml
 
 from .bbox import acc_at_05, intersection_over_union
 from .data import AICDataset
-from .florence import FlorenceGrounder
+from .florence import TASK_PROMPT, FlorenceGrounder
 from .inference import run_inference
 from .submission import build_submission
 from .visualization import draw_comparison
@@ -38,7 +38,37 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest().upper()
 
 
-def _record_environment(config: dict[str, Any], output_dir: Path) -> None:
+def _build_run_fingerprint(
+    config: dict[str, Any], *, fallback_mode: str
+) -> dict[str, Any]:
+    model_path = Path(config["model_path"])
+    weights = model_path / "model.safetensors"
+    queries_path = Path(config["queries_path"])
+    return {
+        "schema_version": 1,
+        "task_prompt": TASK_PROMPT,
+        "queries_path": str(queries_path.resolve()),
+        "queries_sha256": _sha256(queries_path),
+        "model_path": str(model_path.resolve()),
+        "model_weights_sha256": _sha256(weights),
+        "device": config.get("device", "cuda"),
+        "dtype": "float16",
+        "seed": int(config.get("seed", 20260729)),
+        "max_new_tokens": int(config.get("max_new_tokens", 256)),
+        "num_beams": int(config.get("num_beams", 1)),
+        "selection_strategy": config.get("selection_strategy", "first"),
+        "fallback_mode": fallback_mode,
+        "attention_implementation": "eager",
+        "generation_use_cache": False,
+    }
+
+
+def _record_environment(
+    config: dict[str, Any],
+    output_dir: Path,
+    *,
+    run_fingerprint: dict[str, Any],
+) -> None:
     model_path = Path(config["model_path"])
     weights = model_path / "model.safetensors"
     environment = {
@@ -52,7 +82,9 @@ def _record_environment(config: dict[str, Any], output_dir: Path) -> None:
         else None,
         "model_path": str(model_path.resolve()),
         "model_weights_bytes": weights.stat().st_size if weights.exists() else None,
-        "model_weights_sha256": _sha256(weights) if weights.exists() else None,
+        "model_weights_sha256": run_fingerprint["model_weights_sha256"],
+        "queries_path": run_fingerprint["queries_path"],
+        "queries_sha256": run_fingerprint["queries_sha256"],
         "attention_implementation": "eager",
         "generation_use_cache": False,
     }
@@ -123,15 +155,25 @@ def command_infer(
     torch.manual_seed(int(config.get("seed", 20260729)))
     dataset = _make_dataset(config)
     output_dir = Path(output_override or config["output_dir"])
-    _record_environment(config, output_dir)
+    fallback_mode = config.get("fallback_mode", "error")
+    run_fingerprint = _build_run_fingerprint(
+        config,
+        fallback_mode=fallback_mode,
+    )
+    _record_environment(
+        config,
+        output_dir,
+        run_fingerprint=run_fingerprint,
+    )
     grounder = _make_grounder(config)
     result = run_inference(
         dataset=dataset,
         grounder=grounder,
         output_dir=output_dir,
         limit=limit,
-        fallback_mode=config.get("fallback_mode", "error"),
+        fallback_mode=fallback_mode,
         resume=resume,
+        run_fingerprint=run_fingerprint,
     )
     if build_zip:
         if not result.summary["is_full_dataset_run"]:
@@ -150,13 +192,19 @@ def command_sample(config: dict[str, Any], *, output_override: str | None) -> No
     if len(dataset) != 1 or dataset[0].bbox is None:
         raise ValueError("官方 sanity 配置必须指向唯一且带 bbox 的样例")
     output_dir = Path(output_override or config["output_dir"])
-    _record_environment(config, output_dir)
+    run_fingerprint = _build_run_fingerprint(config, fallback_mode="error")
+    _record_environment(
+        config,
+        output_dir,
+        run_fingerprint=run_fingerprint,
+    )
     grounder = _make_grounder(config)
     result = run_inference(
         dataset=dataset,
         grounder=grounder,
         output_dir=output_dir,
         fallback_mode="error",
+        run_fingerprint=run_fingerprint,
     )
     record = dataset[0]
     prediction = result.predictions[record.query_id]
