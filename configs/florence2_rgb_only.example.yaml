@@ -1,0 +1,10 @@
+dataset_root: 'D:\path\to\aic-dataset'
+queries_path: 'D:\path\to\aic-dataset\queries\queries.json'
+model_path: 'D:\path\to\Florence-2-large-ft'
+output_dir: 'outputs\florence2_rgb_only_full'
+device: cuda
+seed: 20260729
+max_new_tokens: 256
+num_beams: 1
+selection_strategy: first
+fallback_mode: center

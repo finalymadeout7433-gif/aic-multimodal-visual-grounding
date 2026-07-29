@@ -72,7 +72,7 @@ Florence 预测：
 - Transformers：`4.57.6`
 - Accelerate：`1.14.0`
 - GPU：`NVIDIA GeForce RTX 4060 Laptop GPU`
-- 模型：`D:\AI_Models\modelscope\AI-ModelScope\Florence-2-large-ft`
+- 模型：本地 `Florence-2-large-ft`（路径由私有配置指定）
 - 权重大小：`1,540,980,506` bytes
 - 权重 SHA-256：
   `8B4E610C952EEF90A836C56CDA0F398A672A3A6CA7B4D96B0E09A86DEE42E2C3`
@@ -82,7 +82,7 @@ Florence 预测：
 
 ### 自动化测试
 
-`15 passed`，覆盖：
+`16 passed`，覆盖：
 
 - 官方 bbox 已知坐标换算；
 - pixel/normalized 双向换算；

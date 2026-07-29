@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from PIL import Image
@@ -38,7 +39,10 @@ def test_dataset_reads_records_and_visible_image_through_public_interface(
 
 
 def test_official_chinese_path_sample_is_read_without_copying() -> None:
-    root = Path(r"D:\基于大模型的多模态视觉理解与推理-示例数据")
+    configured_root = os.environ.get("AIC_OFFICIAL_SAMPLE_ROOT")
+    if not configured_root:
+        return
+    root = Path(configured_root)
     if not (root / "sample.json").exists():
         return
 

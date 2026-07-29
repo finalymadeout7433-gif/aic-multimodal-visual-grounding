@@ -4,6 +4,8 @@ __pycache__/
 *.egg-info/
 
 outputs/
+configs/*.local.yaml
+audit_outputs/
 
 *.pt
 *.pth
