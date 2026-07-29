@@ -3,9 +3,11 @@ from __future__ import annotations
 import pytest
 
 from aic_baseline.florence import (
+    FlorenceConfigurationError,
     FlorenceOutputError,
     extract_candidates,
     select_candidate,
+    validate_selection_strategy,
 )
 
 
@@ -35,3 +37,20 @@ def test_extract_candidates_rejects_empty_model_output() -> None:
         extract_candidates(
             {"<CAPTION_TO_PHRASE_GROUNDING>": {"bboxes": [], "labels": []}}
         )
+
+
+def test_extract_candidates_wraps_non_numeric_coordinates() -> None:
+    parsed = {
+        "<CAPTION_TO_PHRASE_GROUNDING>": {
+            "bboxes": [["left", 20.0, 30.0, 40.0]],
+            "labels": ["object"],
+        }
+    }
+
+    with pytest.raises(FlorenceOutputError, match="坐标"):
+        extract_candidates(parsed)
+
+
+def test_invalid_selection_strategy_is_a_configuration_error() -> None:
+    with pytest.raises(FlorenceConfigurationError, match="策略"):
+        validate_selection_strategy("largest")

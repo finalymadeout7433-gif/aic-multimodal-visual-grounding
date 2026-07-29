@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.2.1 — 2026-07-29
+
+- 记录 Florence-2 RGB-only v0.2.0 平台 ACC@0.5 `0.4980`；
+- 新增外部 grounding 数据的 ZIP 校验、安全解压、统一 JSONL 和可视化工具；
+- 完成 RefCOCO、RefCOCO+、RefCOCOg、gRefCOCO 与 SUN-Spot 数据准备；
+- 核对全部训练 RGB/Depth 引用，核心 RGB split 保证图像互斥；
+- 增加训练清单懒加载接口与 GroundingDINO Swin-T 下一阶段策略。
+- 固定外部标注 SHA-256，并用受限反序列化读取 Pickle；
+- 预览改为不同图像抽样，并在图上显示 Query ID 与文本。
+
+## v0.2.0 — 2026-07-29
+
+- 为断点续跑增加 queries、完整模型工件清单和推理参数指纹，拒绝不一致的旧 checkpoint；
+- 仅对无候选框或非法 bbox 使用显式 fallback，CUDA/OOM 等系统错误立即中止；
+- 新增候选数量、bbox 面积、PNG/JPG 分域、耗时和 GPU 峰值审计指标；
+- 23 项自动化测试全部通过；
+- 完成正式 9,555 条 Query 的 Florence-2 RGB-only 全量推理和提交 ZIP 校验。
+
 ## v0.1.2 — 2026-07-29
 
 - 新增公开安全的数据审计脚本和关键结论摘要；

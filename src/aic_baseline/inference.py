@@ -4,15 +4,18 @@ import csv
 import json
 import statistics
 import time
+from collections import Counter
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
+import torch
 from PIL import Image
 
 from .bbox import BBoxError, pixel_to_normalized, validate_normalized_bbox
 from .data import AICDataset
-from .florence import FlorencePrediction
+from .florence import FlorenceOutputError, FlorencePrediction
 
 
 class Grounder(Protocol):
@@ -46,6 +49,47 @@ def _normalize_candidate(
     return pixel_to_normalized(clamped, width=width, height=height)
 
 
+def _write_run_fingerprint(
+    fingerprint_path: Path, fingerprint: Mapping[str, Any]
+) -> None:
+    fingerprint_path.write_text(
+        json.dumps(
+            dict(fingerprint),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
+def _prepare_run_fingerprint(
+    *,
+    output_dir: Path,
+    run_fingerprint: Mapping[str, Any] | None,
+    resume: bool,
+) -> None:
+    fingerprint_path = output_dir / "run_fingerprint.json"
+    normalized = dict(run_fingerprint) if run_fingerprint is not None else None
+    if resume:
+        if normalized is None:
+            raise ValueError("断点续跑必须提供运行指纹")
+        if not fingerprint_path.is_file():
+            checkpoint_path = output_dir / "predictions_debug.jsonl"
+            if checkpoint_path.exists():
+                raise ValueError("断点续跑缺少已有运行指纹")
+            _write_run_fingerprint(fingerprint_path, normalized)
+            return
+        with fingerprint_path.open("r", encoding="utf-8") as handle:
+            saved = json.load(handle)
+        if saved != normalized:
+            raise ValueError("断点续跑指纹与已有输出不一致")
+        return
+    if normalized is not None:
+        _write_run_fingerprint(fingerprint_path, normalized)
+
+
 def run_inference(
     *,
     dataset: AICDataset,
@@ -55,6 +99,7 @@ def run_inference(
     fallback_mode: str = "error",
     resume: bool = False,
     progress_interval: int = 100,
+    run_fingerprint: Mapping[str, Any] | None = None,
 ) -> InferenceRunResult:
     """逐 Query 推理并写入可审计日志；有限样本运行不会冒充正式提交。"""
 
@@ -66,9 +111,17 @@ def run_inference(
     ]
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
+    _prepare_run_fingerprint(
+        output_dir=output,
+        run_fingerprint=run_fingerprint,
+        resume=resume,
+    )
     debug_path = output / "predictions_debug.jsonl"
     predictions: dict[str, list[float]] = {}
     latencies_ms: list[float] = []
+    candidate_counts: list[int] = []
+    bbox_areas: list[float] = []
+    source_suffix_counts: Counter[str] = Counter()
     fallback_count = 0
     invalid_checkpoint_lines = 0
     failure_records: dict[str, dict[str, str]] = {}
@@ -87,6 +140,10 @@ def run_inference(
                     predictions[query_id] = validate_normalized_bbox(
                         saved["normalized_bbox"]
                     )
+                    x1, y1, x2, y2 = predictions[query_id]
+                    bbox_areas.append((x2 - x1) * (y2 - y1))
+                    candidate_counts.append(len(saved.get("candidates", [])))
+                    source_suffix_counts[str(saved.get("source_suffix", ""))] += 1
                     latencies_ms.append(float(saved.get("latency_ms", 0.0)))
                     fallback_count += int(bool(saved.get("fallback_used", False)))
                     if saved.get("fallback_used", False):
@@ -103,6 +160,9 @@ def run_inference(
 
     reused_count = len(predictions)
     processed_this_run = 0
+    invocation_started = time.perf_counter()
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
 
     mode = "a" if resume else "w"
     with debug_path.open(mode, encoding="utf-8", newline="\n") as debug_file:
@@ -130,7 +190,7 @@ def run_inference(
                     width=image.width,
                     height=image.height,
                 )
-            except (BBoxError, ValueError, RuntimeError) as error:
+            except (BBoxError, FlorenceOutputError) as error:
                 if fallback_mode == "error":
                     raise
                 normalized = [0.25, 0.25, 0.75, 0.75]
@@ -141,6 +201,10 @@ def run_inference(
             latencies_ms.append(latency_ms)
             processed_this_run += 1
             predictions[record.query_id] = validate_normalized_bbox(normalized)
+            x1, y1, x2, y2 = predictions[record.query_id]
+            bbox_areas.append((x2 - x1) * (y2 - y1))
+            candidate_counts.append(len(candidates))
+            source_suffix_counts[record.visible_path.suffix.lower()] += 1
             if fallback_used:
                 failure_records[record.query_id] = {
                     "query_id": record.query_id,
@@ -179,6 +243,9 @@ def run_inference(
                 )
 
     count = len(selected_records)
+    invocation_seconds = time.perf_counter() - invocation_started
+    large_box_count = sum(area > 0.5 for area in bbox_areas)
+    multi_candidate_count = sum(value > 1 for value in candidate_counts)
     summary = {
         "records_in_dataset": len(dataset),
         "records_processed": count,
@@ -190,9 +257,30 @@ def run_inference(
         "valid_bbox_rate": len(predictions) / count if count else 0.0,
         "fallback_count": fallback_count,
         "fallback_rate": fallback_count / count if count else 0.0,
+        "system_error_count": 0,
+        "source_suffix_counts": dict(source_suffix_counts),
+        "candidate_count_mean": (
+            statistics.fmean(candidate_counts) if candidate_counts else 0.0
+        ),
+        "candidate_count_p50": _percentile(candidate_counts, 0.50),
+        "candidate_count_p95": _percentile(candidate_counts, 0.95),
+        "candidate_count_max": max(candidate_counts, default=0),
+        "multi_candidate_count": multi_candidate_count,
+        "multi_candidate_rate": multi_candidate_count / count if count else 0.0,
+        "bbox_area_mean": statistics.fmean(bbox_areas) if bbox_areas else 0.0,
+        "bbox_area_p50": _percentile(bbox_areas, 0.50),
+        "bbox_area_p95": _percentile(bbox_areas, 0.95),
+        "bbox_area_max": max(bbox_areas, default=0.0),
+        "bbox_area_over_50_count": large_box_count,
+        "bbox_area_over_50_rate": large_box_count / count if count else 0.0,
         "latency_ms_mean": statistics.fmean(latencies_ms) if latencies_ms else 0.0,
         "latency_ms_p50": _percentile(latencies_ms, 0.50),
         "latency_ms_p95": _percentile(latencies_ms, 0.95),
+        "inference_latency_seconds_total": sum(latencies_ms) / 1000.0,
+        "wall_time_seconds_this_invocation": invocation_seconds,
+        "gpu_peak_memory_bytes": (
+            torch.cuda.max_memory_allocated() if torch.cuda.is_available() else 0
+        ),
     }
     (output / "predictions.json").write_text(
         json.dumps(predictions, ensure_ascii=False, indent=2) + "\n",

@@ -1,0 +1,28 @@
+model_id: IDEA-Research/grounding-dino-tiny
+data_root: null
+train_manifest: manifests/processed/rgb_core_v1_train.jsonl
+validation_manifest: manifests/processed/rgb_core_v1_validation.jsonl
+holdout_manifest: manifests/processed/rgb_core_v1_holdout.jsonl
+
+seed: 20260729
+precision: fp16
+train_batch_size: 1
+gradient_accumulation_steps: 8
+gradient_checkpointing: true
+max_image_side: 800
+
+stage_1:
+  epochs: 1
+  freeze_vision_backbone: true
+  freeze_text_backbone: true
+  learning_rate: 0.0001
+
+stage_2:
+  epochs: 2
+  unfreeze_last_vision_stages: true
+  learning_rate: 0.00001
+
+evaluation:
+  primary_metric: acc_at_05
+  select_best_on: validation
+  holdout_for_final_check_only: true
