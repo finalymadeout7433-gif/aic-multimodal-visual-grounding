@@ -38,6 +38,25 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest().upper()
 
 
+def _directory_manifest_sha256(root: Path) -> str:
+    if not root.is_dir():
+        raise FileNotFoundError(f"模型目录不存在: {root}")
+    digest = hashlib.sha256()
+    files = sorted(path for path in root.rglob("*") if path.is_file())
+    if not files:
+        raise ValueError(f"模型目录中没有文件: {root}")
+    for path in files:
+        relative_path = path.relative_to(root).as_posix()
+        file_hash = _sha256(path)
+        digest.update(relative_path.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(str(path.stat().st_size).encode("ascii"))
+        digest.update(b"\0")
+        digest.update(file_hash.encode("ascii"))
+        digest.update(b"\n")
+    return digest.hexdigest().upper()
+
+
 def _build_run_fingerprint(
     config: dict[str, Any], *, fallback_mode: str
 ) -> dict[str, Any]:
@@ -45,12 +64,13 @@ def _build_run_fingerprint(
     weights = model_path / "model.safetensors"
     queries_path = Path(config["queries_path"])
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "task_prompt": TASK_PROMPT,
         "queries_path": str(queries_path.resolve()),
         "queries_sha256": _sha256(queries_path),
         "model_path": str(model_path.resolve()),
         "model_weights_sha256": _sha256(weights),
+        "model_artifacts_sha256": _directory_manifest_sha256(model_path),
         "device": config.get("device", "cuda"),
         "dtype": "float16",
         "seed": int(config.get("seed", 20260729)),
@@ -83,6 +103,7 @@ def _record_environment(
         "model_path": str(model_path.resolve()),
         "model_weights_bytes": weights.stat().st_size if weights.exists() else None,
         "model_weights_sha256": run_fingerprint["model_weights_sha256"],
+        "model_artifacts_sha256": run_fingerprint["model_artifacts_sha256"],
         "queries_path": run_fingerprint["queries_path"],
         "queries_sha256": run_fingerprint["queries_sha256"],
         "attention_implementation": "eager",

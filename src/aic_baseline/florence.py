@@ -16,6 +16,10 @@ class FlorenceOutputError(ValueError):
     """Florence 输出中没有可用候选框。"""
 
 
+class FlorenceConfigurationError(ValueError):
+    """Florence baseline 配置不受支持。"""
+
+
 @dataclass(frozen=True)
 class FlorenceCandidate:
     pixel_bbox: list[float]
@@ -43,13 +47,21 @@ def extract_candidates(parsed: dict[str, Any]) -> list[FlorenceCandidate]:
         if not isinstance(box, (list, tuple)) or len(box) != 4:
             raise FlorenceOutputError(f"第 {index + 1} 个候选框格式错误")
         label = str(labels[index]) if index < len(labels) else ""
-        candidates.append(
-            FlorenceCandidate(
-                pixel_bbox=[float(value) for value in box],
-                label=label,
-            )
-        )
+        try:
+            pixel_bbox = [float(value) for value in box]
+        except (TypeError, ValueError) as exc:
+            raise FlorenceOutputError(
+                f"第 {index + 1} 个候选框坐标不是数字"
+            ) from exc
+        candidates.append(FlorenceCandidate(pixel_bbox=pixel_bbox, label=label))
     return candidates
+
+
+def validate_selection_strategy(strategy: str) -> None:
+    if strategy != "first":
+        raise FlorenceConfigurationError(
+            f"baseline v0 不支持候选选择策略: {strategy}"
+        )
 
 
 def select_candidate(
@@ -57,8 +69,7 @@ def select_candidate(
 ) -> FlorenceCandidate:
     if not candidates:
         raise FlorenceOutputError("候选框列表为空")
-    if strategy != "first":
-        raise FlorenceOutputError(f"baseline v0 不支持候选选择策略: {strategy}")
+    validate_selection_strategy(strategy)
     return candidates[0]
 
 
@@ -81,6 +92,7 @@ class FlorenceGrounder:
         self.max_new_tokens = max_new_tokens
         self.num_beams = num_beams
         self.selection_strategy = selection_strategy
+        validate_selection_strategy(self.selection_strategy)
         self.processor = AutoProcessor.from_pretrained(
             self.model_path,
             trust_remote_code=True,

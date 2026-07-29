@@ -9,6 +9,7 @@ import pytest
 from aic_baseline.data import AICDataset
 from aic_baseline.florence import (
     FlorenceCandidate,
+    FlorenceConfigurationError,
     FlorencePrediction,
     FlorenceOutputError,
 )
@@ -36,6 +37,11 @@ class MustNotRunGrounder:
 class RuntimeFailureGrounder:
     def predict(self, *, image: Image.Image, query: str) -> FlorencePrediction:
         raise RuntimeError("CUDA out of memory")
+
+
+class ConfigurationFailureGrounder:
+    def predict(self, *, image: Image.Image, query: str) -> FlorencePrediction:
+        raise FlorenceConfigurationError("unsupported selection strategy")
 
 
 RUN_FINGERPRINT = {
@@ -180,3 +186,17 @@ def test_runtime_error_aborts_instead_of_using_center_fallback(
 
     debug_path = tmp_path / "run" / "predictions_debug.jsonl"
     assert debug_path.read_text(encoding="utf-8") == ""
+
+
+def test_configuration_error_aborts_instead_of_using_center_fallback(
+    tmp_path: Path,
+) -> None:
+    dataset = make_dataset(tmp_path)
+
+    with pytest.raises(FlorenceConfigurationError, match="strategy"):
+        run_inference(
+            dataset=dataset,
+            grounder=ConfigurationFailureGrounder(),
+            output_dir=tmp_path / "run",
+            fallback_mode="center",
+        )

@@ -76,13 +76,19 @@ Florence 预测：
 - 权重大小：`1,540,980,506` bytes
 - 权重 SHA-256：
   `8B4E610C952EEF90A836C56CDA0F398A672A3A6CA7B4D96B0E09A86DEE42E2C3`
+- 完整模型工件清单 SHA-256：
+  `5FD1E3D6A5859942A39A1303AD2BCA0FDF2A2111685B683859F5AC1285319507`
 - 兼容配置：`attn_implementation="eager"`、`use_cache=False`
+
+完整工件指纹在全量运行后的代码审查阶段补算。模型目录内所有文件的修改时间均早于
+本次全量推理，且权重与 Query 哈希未变化；运行指纹已升级为 schema v2，使当前输出
+可以继续接受新版 `--resume` 的一致性校验。
 
 ## 5. 测试与验证
 
 ### 自动化测试
 
-`19 passed`，覆盖：
+`23 passed`，覆盖：
 
 - 官方 bbox 已知坐标换算；
 - pixel/normalized 双向换算；
@@ -97,7 +103,9 @@ Florence 预测：
 - ZIP 中只含正确提交 JSON。
 - 空输出目录可用 `--resume` 初始化；
 - resume 指纹不一致时拒绝复用旧 checkpoint；
-- CUDA/OOM 等 RuntimeError 不会被静默转换为中心 fallback。
+- 完整模型工件中非权重文件变化也会改变运行指纹；
+- CUDA/OOM 等 RuntimeError 和配置错误不会被静默转换为中心 fallback；
+- 非数字候选坐标按非法模型输出进入显式 fallback。
 
 另外：
 
@@ -192,17 +200,20 @@ ZIP 中只有 `predictions_submission.json`；记录只含原始
 - 写操作只落到用户指定的 baseline 输出目录。
 - 未发现宽泛 `except Exception`、动态 `eval/exec` 或静默失败。
 - fallback、错误、原始模型文本和耗时均可审计。
-- 19 项自动化测试、编译与依赖完整性检查均通过。
+- 23 项自动化测试、编译与依赖完整性检查均通过。
 
 ### Spec
 
 - 已实现数据→模型→bbox→日志→JSON→ZIP 完整闭环。
 - 已阻止有限样本运行生成“正式提交”。
 - 已实现并验证全量长任务所需的逐条落盘和安全 `--resume`。
+- resume 指纹覆盖 queries、完整模型目录工件及全部关键推理参数。
+- 配置错误和系统错误立即中止；只有无候选或非法框可使用显式 fallback。
 - 已保留正式数据和官方样例原文件。
 - v0 明确只使用 RGB 与原始 Query，符合阶段边界。
 
-未发现阻止 baseline v0 运行的关键问题。
+双轴审查提出的完整模型指纹、配置错误分类、非数字坐标分类和重复写入问题均已修复，
+未留下阻止 baseline v0 运行的关键问题。
 
 ## 7. 当前限制与下一步
 

@@ -49,6 +49,21 @@ def _normalize_candidate(
     return pixel_to_normalized(clamped, width=width, height=height)
 
 
+def _write_run_fingerprint(
+    fingerprint_path: Path, fingerprint: Mapping[str, Any]
+) -> None:
+    fingerprint_path.write_text(
+        json.dumps(
+            dict(fingerprint),
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def _prepare_run_fingerprint(
     *,
     output_dir: Path,
@@ -64,16 +79,7 @@ def _prepare_run_fingerprint(
             checkpoint_path = output_dir / "predictions_debug.jsonl"
             if checkpoint_path.exists():
                 raise ValueError("断点续跑缺少已有运行指纹")
-            fingerprint_path.write_text(
-                json.dumps(
-                    normalized,
-                    ensure_ascii=False,
-                    indent=2,
-                    sort_keys=True,
-                )
-                + "\n",
-                encoding="utf-8",
-            )
+            _write_run_fingerprint(fingerprint_path, normalized)
             return
         with fingerprint_path.open("r", encoding="utf-8") as handle:
             saved = json.load(handle)
@@ -81,11 +87,7 @@ def _prepare_run_fingerprint(
             raise ValueError("断点续跑指纹与已有输出不一致")
         return
     if normalized is not None:
-        fingerprint_path.write_text(
-            json.dumps(normalized, ensure_ascii=False, indent=2, sort_keys=True)
-            + "\n",
-            encoding="utf-8",
-        )
+        _write_run_fingerprint(fingerprint_path, normalized)
 
 
 def run_inference(
