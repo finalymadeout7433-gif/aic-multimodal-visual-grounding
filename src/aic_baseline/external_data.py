@@ -40,6 +40,7 @@ class DatasetSpec:
     instances_path: Path
     image_root: Path
     image_prefix: str
+    refs_sha256: str | None = None
     image_namespace: str | None = None
     depth_root: Path | None = None
     depth_prefix: str | None = None
@@ -213,13 +214,32 @@ def audit_extracted_zip(
     )
 
 
-def _load_refs(path: Path) -> list[dict[str, Any]]:
+class _RestrictedUnpickler(pickle.Unpickler):
+    def find_class(self, module: str, name: str) -> Any:
+        raise pickle.UnpicklingError(
+            f"forbidden pickle global: {module}.{name}"
+        )
+
+
+def load_annotation_refs(
+    path: Path,
+    expected_sha256: str | None = None,
+) -> list[dict[str, Any]]:
+    if expected_sha256 is not None:
+        actual_sha256 = sha256_file(path)
+        if actual_sha256.upper() != expected_sha256.upper():
+            raise ValueError(
+                f"annotation SHA-256 mismatch: {path}; "
+                f"expected={expected_sha256.upper()}, actual={actual_sha256}"
+            )
     if path.suffix.lower() == ".json":
         with path.open("r", encoding="utf-8") as handle:
             value = json.load(handle)
     else:
+        if expected_sha256 is None:
+            raise ValueError(f"pickle annotation requires SHA-256: {path}")
         with path.open("rb") as handle:
-            value = pickle.load(handle)
+            value = _RestrictedUnpickler(handle, encoding="latin1").load()
     if not isinstance(value, list):
         raise ValueError(f"refs 顶层不是列表: {path}")
     return value
@@ -258,7 +278,7 @@ def _union_bboxes(
 def build_dataset_records(
     spec: DatasetSpec,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    refs = _load_refs(spec.refs_path)
+    refs = load_annotation_refs(spec.refs_path, spec.refs_sha256)
     with spec.instances_path.open("r", encoding="utf-8") as handle:
         instances = json.load(handle)
     images = {image["id"]: image for image in instances["images"]}
@@ -441,5 +461,11 @@ def write_preview(
         outline=(255, 0, 0),
         width=line_width,
     )
+    label = f"{record['query_id']} | {record['query']}"
+    label = label.encode("ascii", errors="replace").decode("ascii")[:120]
+    text_bbox = draw.textbbox((0, 0), label)
+    text_height = text_bbox[3] - text_bbox[1] + 8
+    draw.rectangle((0, 0, width, text_height), fill=(0, 0, 0))
+    draw.text((4, 4), label, fill=(255, 255, 255))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     image.save(output_path, quality=92)

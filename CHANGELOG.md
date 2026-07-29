@@ -7,6 +7,8 @@
 - 完成 RefCOCO、RefCOCO+、RefCOCOg、gRefCOCO 与 SUN-Spot 数据准备；
 - 核对全部训练 RGB/Depth 引用，核心 RGB split 保证图像互斥；
 - 增加训练清单懒加载接口与 GroundingDINO Swin-T 下一阶段策略。
+- 固定外部标注 SHA-256，并用受限反序列化读取 Pickle；
+- 预览改为不同图像抽样，并在图上显示 Query ID 与文本。
 
 ## v0.2.0 — 2026-07-29
 

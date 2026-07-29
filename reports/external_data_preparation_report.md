@@ -71,9 +71,17 @@ Depth 相对路径。所有生成的 JSONL 大小与 SHA-256 记录在同目录�
 
 预览位于 `D:\AIC赛题一数据集\previews`。已核对：
 
+- 每个数据集抽取 3 个不同 `image_key`，避免同图不同 Query 造成重复预览；
+- 图像顶部写入 `query_id` 和 Query，红框表示对应 bbox；
+
 - RefCOCO：`the lady with the blue shirt`；
 - gRefCOCO：`giraffe on left`；
 - SUN-Spot：带叶片图案的 shower curtain。
 
 三者的 Query、图像与 bbox 均对应合理。抽样核验不能替代全量语义人工审查，但结合
 全量路径、尺寸和 bbox 合法性检查，已经满足开始第一轮训练的工程条件。
+
+所有 `.p` 标注在读取前都必须匹配代码中固定的 SHA-256，并使用禁止加载任意
+Python 全局对象的受限 Unpickler。JSON 标注同样固定 SHA-256，用于数据版本复现。
+本报告所称“训练条件”是数据与统一清单已就绪；模型专用 collator、训练循环、
+验证和 checkpoint 入口属于下一版本，当前尚未实现。

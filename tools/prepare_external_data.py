@@ -37,6 +37,7 @@ def _dataset_specs(root: Path) -> list[DatasetSpec]:
         DatasetSpec(
             name="refcoco",
             refs_path=family / "refcoco/refs(unc).p",
+            refs_sha256="D4A8DD3152F130127924F9D0F0EA30F4DC43EC19E1B47BC55AF972F90614F8BA",
             instances_path=family / "refcoco/instances.json",
             image_root=coco_images,
             image_prefix="shared/COCO2014/images/train2014",
@@ -45,6 +46,7 @@ def _dataset_specs(root: Path) -> list[DatasetSpec]:
         DatasetSpec(
             name="refcoco_plus",
             refs_path=family / "refcoco+/refs(unc).p",
+            refs_sha256="7DE24C182449758B9D9AE87D968B1F25831236A54D38D45408E2E0FDD318E802",
             instances_path=family / "refcoco+/instances.json",
             image_root=coco_images,
             image_prefix="shared/COCO2014/images/train2014",
@@ -53,6 +55,7 @@ def _dataset_specs(root: Path) -> list[DatasetSpec]:
         DatasetSpec(
             name="refcocog",
             refs_path=family / "refcocog/refs(umd).p",
+            refs_sha256="0331C7533537B67C2F7AC8C8BAB0DA2D379D1754C6F5C110FD79F70E17E7BDDB",
             instances_path=family / "refcocog/instances.json",
             image_root=coco_images,
             image_prefix="shared/COCO2014/images/train2014",
@@ -61,6 +64,7 @@ def _dataset_specs(root: Path) -> list[DatasetSpec]:
         DatasetSpec(
             name="grefcoco",
             refs_path=root / "01_RGB_Grounding/gRefCOCO/archives/grefs_unc.json",
+            refs_sha256="CC37C5FF95373C78A6A3F98B4C7BC67FDE387EA8514752A1392DB64223EB3366",
             instances_path=root / "01_RGB_Grounding/gRefCOCO/archives/instances.json",
             image_root=coco_images,
             image_prefix="shared/COCO2014/images/train2014",
@@ -72,6 +76,7 @@ def _dataset_specs(root: Path) -> list[DatasetSpec]:
         DatasetSpec(
             name="sunspot",
             refs_path=root / "02_RGBD_Grounding/SUN-Spot/archives/refs(boulder).p",
+            refs_sha256="6EE465478306DFC8776CACF86B4AE570A079991212E269C22D7829AFA2A3C18B",
             instances_path=root / "02_RGBD_Grounding/SUN-Spot/archives/instances.json",
             image_root=sun_root,
             image_prefix="02_RGBD_Grounding/SUN-Spot/SUNRGBD_base/raw",
@@ -158,9 +163,18 @@ def command_prepare(root: Path, *, preview_count: int) -> None:
         all_records[spec.name] = assigned
         dataset_summaries[spec.name] = summary
         _write_split_manifests(manifest_root, spec.name, assigned)
-        preview_candidates = [
-            record for record in assigned if record["image_exists"]
-        ][:preview_count]
+        for stale_preview in previews_root.glob(f"{spec.name}_*.jpg"):
+            stale_preview.unlink()
+        preview_candidates: list[dict[str, Any]] = []
+        preview_image_keys: set[str] = set()
+        for record in assigned:
+            image_key = str(record["image_key"])
+            if not record["image_exists"] or image_key in preview_image_keys:
+                continue
+            preview_candidates.append(record)
+            preview_image_keys.add(image_key)
+            if len(preview_candidates) >= preview_count:
+                break
         preview_counts[spec.name] = len(preview_candidates)
         for index, record in enumerate(preview_candidates, start=1):
             write_preview(

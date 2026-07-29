@@ -14,6 +14,8 @@ from aic_baseline.external_data import (
     build_dataset_records,
     build_image_isolated_splits,
     extract_verified_zip,
+    load_annotation_refs,
+    sha256_file,
     verify_zip_archive,
 )
 
@@ -101,6 +103,7 @@ def test_build_refcoco_records_normalizes_bbox_and_preserves_split(
             instances_path=instances_path,
             image_root=image_root,
             image_prefix="images",
+            refs_sha256=sha256_file(refs_path),
         )
     )
 
@@ -167,3 +170,25 @@ def test_manifest_dataset_returns_training_ready_image_query_and_bbox(
     assert sample["image"].size == (20, 10)
     assert sample["query"] == "the white image"
     assert sample["bbox_xyxy_normalized"] == [0.1, 0.2, 0.8, 0.9]
+
+
+def test_pickle_refs_require_matching_sha256(tmp_path: Path) -> None:
+    refs_path = tmp_path / "refs.p"
+    with refs_path.open("wb") as handle:
+        pickle.dump([], handle)
+
+    with pytest.raises(ValueError, match="SHA-256"):
+        load_annotation_refs(refs_path, "0" * 64)
+
+
+def test_pickle_refs_reject_global_object_loading(tmp_path: Path) -> None:
+    class UnsafePayload:
+        def __reduce__(self):
+            return eval, ("1 + 1",)
+
+    refs_path = tmp_path / "unsafe.p"
+    with refs_path.open("wb") as handle:
+        pickle.dump([UnsafePayload()], handle)
+
+    with pytest.raises(pickle.UnpicklingError, match="forbidden"):
+        load_annotation_refs(refs_path, sha256_file(refs_path))

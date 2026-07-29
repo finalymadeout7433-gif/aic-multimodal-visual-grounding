@@ -77,10 +77,13 @@ python tools\prepare_external_data.py `
   --data-root "D:\AIC赛题一数据集" all
 ```
 
-训练代码读取 `manifests/processed/rgb_core_v1_*.jsonl`，通过
+后续训练代码可读取 `manifests/processed/rgb_core_v1_*.jsonl`，通过
 `GroundingManifestDataset` 懒加载图像、Query 和归一化 bbox。数据统计见
 [外部数据准备报告](reports/external_data_preparation_report.md)，下一模型与训练边界见
 [模型和训练策略](reports/model_and_training_strategy.md)。
+
+当前仓库已完成训练数据清单和加载接口；GroundingDINO 的 processor、collator、
+训练循环、验证与 checkpoint 入口尚未实现，因此本版本不称为“一键训练完成”。
 
 ## 数据审计
 
