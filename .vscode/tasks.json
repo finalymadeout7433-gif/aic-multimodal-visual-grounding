@@ -1,0 +1,93 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "AIC: 运行全部测试",
+      "type": "process",
+      "command": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AIC: 核验正式数据路径",
+      "type": "process",
+      "command": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "args": [
+        "-m",
+        "aic_baseline.cli",
+        "validate",
+        "--config",
+        "configs\\florence2_rgb_only.yaml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AIC: 运行官方样例",
+      "type": "process",
+      "command": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "args": [
+        "-m",
+        "aic_baseline.cli",
+        "sample",
+        "--config",
+        "configs\\official_sample.yaml"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AIC: 正式数据 smoke 10条",
+      "type": "process",
+      "command": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "args": [
+        "-m",
+        "aic_baseline.cli",
+        "infer",
+        "--config",
+        "configs\\florence2_rgb_only.yaml",
+        "--limit",
+        "10",
+        "--output-dir",
+        "outputs\\vscode_smoke_10"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "AIC: 全量9555条并生成提交（长任务）",
+      "type": "process",
+      "command": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "args": [
+        "-m",
+        "aic_baseline.cli",
+        "infer",
+        "--config",
+        "configs\\florence2_rgb_only.yaml",
+        "--build-submission",
+        "--resume"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

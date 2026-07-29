@@ -1,0 +1,39 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AIC: 调试官方样例",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "aic_baseline.cli",
+      "args": [
+        "sample",
+        "--config",
+        "configs\\official_sample.yaml"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "python": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "justMyCode": true
+    },
+    {
+      "name": "AIC: 调试1条正式Query",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "aic_baseline.cli",
+      "args": [
+        "infer",
+        "--config",
+        "configs\\florence2_rgb_only.yaml",
+        "--limit",
+        "1",
+        "--output-dir",
+        "outputs\\debug_one"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "python": "D:\\Anaconda\\envs\\aic-baseline\\python.exe",
+      "justMyCode": true
+    }
+  ]
+}

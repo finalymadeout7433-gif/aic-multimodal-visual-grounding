@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIC Git 版本速查</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+<main>
+  <h1>AIC Git 版本速查</h1>
+  <table>
+    <tr><th>目的</th><th>命令</th></tr>
+    <tr><td>查看当前改动</td><td><code>git status</code></td></tr>
+    <tr><td>查看具体差异</td><td><code>git diff</code></td></tr>
+    <tr><td>暂存指定文件</td><td><code>git add 路径</code></td></tr>
+    <tr><td>暂存项目改动</td><td><code>git add -A</code></td></tr>
+    <tr><td>保存一个版本</td><td><code>git commit -m "feat: 描述"</code></td></tr>
+    <tr><td>查看版本历史</td><td><code>git log --oneline --decorate --graph</code></td></tr>
+    <tr><td>标记比赛版本</td><td><code>git tag -a v0.2.0 -m "说明"</code></td></tr>
+    <tr><td>查看某版本文件</td><td><code>git show v0.1.0:README.md</code></td></tr>
+  </table>
+  <h2>建议版本节奏</h2>
+  <pre>v0.1.0  Florence RGB-only 完整闭环
+v0.2.0  多尺度/切片
+v0.3.0  GroundingDINO 候选
+v0.4.0  Query 关系重排序
+v0.5.0  IR/Depth 消融
+v1.0.0  最终稳定提交</pre>
+  <p class="note">不要用 Git 保存数据集、模型权重、ZIP 提交文件和大规模预测日志。</p>
+</main>
+</body>
+</html>
