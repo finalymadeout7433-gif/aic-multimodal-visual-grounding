@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.1 — 2026-07-29
+
+- 记录 Florence-2 RGB-only v0.2.0 平台 ACC@0.5 `0.4980`；
+- 新增外部 grounding 数据的 ZIP 校验、安全解压、统一 JSONL 和可视化工具；
+- 完成 RefCOCO、RefCOCO+、RefCOCOg、gRefCOCO 与 SUN-Spot 数据准备；
+- 核对全部训练 RGB/Depth 引用，核心 RGB split 保证图像互斥；
+- 增加训练清单懒加载接口与 GroundingDINO Swin-T 下一阶段策略。
+
 ## v0.2.0 — 2026-07-29
 
 - 为断点续跑增加 queries、完整模型工件清单和推理参数指纹，拒绝不一致的旧 checkpoint；
