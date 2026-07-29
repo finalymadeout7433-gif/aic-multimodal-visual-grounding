@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>第二课：隐藏标签验证与 Git 同步</title>
+  <link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body>
+<main>
+  <h1>第二课：没有正式 bbox，模型怎样训练和验证？</h1>
+  <p>目标：你能分清训练集、验证集、正式测试集和排行榜，也能说清 Git 的四个位置。</p>
+
+  <h2>一、正式初赛数据不是训练集</h2>
+  <table>
+    <tr><th>数据</th><th>有没有 bbox</th><th>正确用途</th></tr>
+    <tr><td>合法的外部/自建训练集</td><td>有</td><td>计算 loss，更新模型权重</td></tr>
+    <tr><td>独立验证集</td><td>有</td><td>比较模型、选参数，不更新权重</td></tr>
+    <tr><td>官方单样例</td><td>仅 1 条有 bbox</td><td>检查读取、坐标和评测代码</td></tr>
+    <tr><td>正式 9,555 条 Query</td><td>没有</td><td>只做推理，生成提交 JSON/ZIP</td></tr>
+  </table>
+  <p class="note">正式集的真实 bbox 藏在比赛平台中。规则明确禁止把正式测试集用于训练，也不能人工补 bbox。</p>
+
+  <h2>二、我们的完整验证阶梯</h2>
+  <div class="flow">
+    <span>自动化单元测试</span><span>官方单样例</span><span>外部有标签验证集</span>
+    <span>正式集无标签试跑</span><span>平台隐藏标签评分</span>
+  </div>
+  <ol>
+    <li><strong>单元测试：</strong>验证 bbox 互转、IoU、JSON 和 ZIP，没有模型分数含义。</li>
+    <li><strong>官方单样例：</strong>只能称为 sanity check，不能用 1 条数据判断模型强弱。</li>
+    <li><strong>外部有标签验证集：</strong>用 ACC@0.5 比较 Florence、GroundingDINO 和后续融合方案。</li>
+    <li><strong>正式集 dry run：</strong>统计无输出率、非法框率、耗时和显存，不计算本地 ACC。</li>
+    <li><strong>排行榜：</strong>上传预测 ZIP，由平台隐藏 bbox 给出目标域分数。</li>
+  </ol>
+  <p>每次排行榜提交都要绑定实验编号、Git commit、配置文件和说明。不要每改一行就上传，也不要反复根据公榜“猜答案”。</p>
+
+  <h2>三、正式数据怎样参与项目？</h2>
+  <pre>训练阶段：
+外部有标签图像 + Query + bbox
+        ↓
+训练代码更新权重
+        ↓
+独立验证集选择最佳权重
+
+比赛阶段：
+最佳固定权重 + 正式图像 + Query
+        ↓
+推理代码预测 bbox
+        ↓
+submission.json → ZIP → 比赛平台评分</pre>
+  <p>正式数据会参与<strong>最终推理</strong>，但不会参与<strong>反向传播训练</strong>。如果以后要训练，应先准备合规的有标签数据，并检查许可证、数据来源以及是否与测试集重叠。</p>
+
+  <h2>四、初赛上传的不是模型</h2>
+  <p>依据当前官方材料，初赛、复赛上传的是测试集预测结果 ZIP；JSON 只添加或修改
+  <code>bbox</code>。到半决赛才要求同时提交代码、预测结果、模型文件、环境说明和技术报告。</p>
+
+  <h2>五、Git 的四个位置</h2>
+  <table>
+    <tr><th>位置</th><th>你在哪里看到</th><th>它保存什么</th></tr>
+    <tr><td>工作区 Working Tree</td><td>VS Code 资源管理器和“更改”</td><td>刚编辑、尚未选入版本的文件</td></tr>
+    <tr><td>暂存区 Staging Area</td><td>源代码管理里的“暂存的更改”</td><td>准备放进下一次 commit 的快照</td></tr>
+    <tr><td>本地仓库 Local Repository</td><td><code>.git</code> 和 <code>git log</code></td><td>已经 commit 的历史版本</td></tr>
+    <tr><td>远程仓库 GitHub</td><td>GitHub 网页</td><td>执行 push 后的在线副本</td></tr>
+  </table>
+  <pre>修改/运行 ≠ 自动上传
+
+编辑 → git add → git commit → git push
+工作区   暂存区      本地仓库      GitHub</pre>
+  <p class="note">运行程序只会产生结果文件。除非专门配置自动化，否则 Git 不会自动暂存、提交或上传。VS Code 的“同步更改”也不会替你决定提交哪些未提交文件。</p>
+
+  <h2>六、每一版建议操作</h2>
+  <pre>git status
+pytest
+git add 要保存的文件
+git commit -m "feat: 描述这一版改变"
+git tag v0.2.0
+git push origin main
+git push origin v0.2.0</pre>
+  <p>数据集、模型权重和 <code>outputs/</code> 不进入 Git；仓库保存代码、配置、测试、报告和复现命令。</p>
+
+  <h2>七、你的练习</h2>
+  <ol class="note practice">
+    <li>在 VS Code 左侧打开“源代码管理”，找到“更改”。</li>
+    <li>运行 <code>git status</code>，观察本课文件此时属于哪个位置。</li>
+    <li>用一句话回答：为什么正式 9,555 条数据能推理，却不能训练？</li>
+    <li>用自己的话复述：修改文件后，为什么 GitHub 不会自动变化？</li>
+  </ol>
+
+  <p>主要参考：
+    <a href="https://git-scm.com/docs/gittutorial">Git Tutorial</a>、
+    <a href="https://code.visualstudio.com/docs/sourcecontrol/overview">VS Code Source Control</a>。
+  </p>
+  <p>完成练习后，把你的复述发给 Codex；如果有混淆，我们直接用当前仓库做一次真实提交练习。</p>
+</main>
+</body>
+</html>
