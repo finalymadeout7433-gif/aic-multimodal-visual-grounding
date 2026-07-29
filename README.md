@@ -77,6 +77,15 @@ python tools\prepare_external_data.py `
   --data-root "D:\AIC赛题一数据集" all
 ```
 
+`all` 仅适用于两个原始大 ZIP 仍存在的首次准备过程。2026-07-29 完整核验后，
+本机已删除 `train2014.zip` 和 `SUNRGBD.zip`，保留解压数据并释放 18.995 GiB。
+当前重新生成清单应使用：
+
+```powershell
+python tools\prepare_external_data.py `
+  --data-root "D:\AIC赛题一数据集" prepare
+```
+
 后续训练代码可读取 `manifests/processed/rgb_core_v1_*.jsonl`，通过
 `GroundingManifestDataset` 懒加载图像、Query 和归一化 bbox。数据统计见
 [外部数据准备报告](reports/external_data_preparation_report.md)，下一模型与训练边界见

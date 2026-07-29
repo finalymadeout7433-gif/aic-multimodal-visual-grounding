@@ -85,3 +85,17 @@ Depth 相对路径。所有生成的 JSONL 大小与 SHA-256 记录在同目录�
 Python 全局对象的受限 Unpickler。JSON 标注同样固定 SHA-256，用于数据版本复现。
 本报告所称“训练条件”是数据与统一清单已就绪；模型专用 collator、训练循环、
 验证和 checkpoint 入口属于下一版本，当前尚未实现。
+
+## 归档清理
+
+2026-07-29，在 SHA-256、CRC、解压文件数量、文件大小和训练引用全部通过后，
+删除以下两个仅用于恢复的原始归档：
+
+- `train2014.zip`：13,510,573,713 bytes；
+- `SUNRGBD.zip`：6,885,481,608 bytes。
+
+合计释放 18.995 GiB。解压后的 COCO 图片、SUN RGB/Depth、标注、训练清单和
+预览均保留。删除后重新运行真实加载 smoke test，RGB 核心清单仍为 287,604 条，
+RGB 图片与 SUN RGB/Depth 样本均可读取。完整清理证据保存在数据根目录
+`manifests/archive_cleanup_2026-07-29.json`。恢复归档需要重新下载，并使用本报告
+前述 SHA-256 复核。
