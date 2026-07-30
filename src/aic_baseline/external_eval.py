@@ -45,6 +45,10 @@ class ExternalPredictor(Protocol):
         ...
 
 
+class CandidateNumericalError(RuntimeError):
+    """A non-finite model output that must abort the experiment."""
+
+
 def normalize_grounding_query(query: str) -> str:
     """Apply the fixed GroundingDINO text normalization policy."""
 
@@ -71,7 +75,9 @@ def _candidate_to_normalized(
         raise ValueError("candidate bbox must have four coordinates")
     values = [float(value) for value in candidate.pixel_bbox]
     if not all(math.isfinite(value) for value in values):
-        raise ValueError("candidate bbox contains NaN or infinity")
+        raise CandidateNumericalError(
+            "candidate bbox contains NaN or infinity"
+        )
     x1, y1, x2, y2 = values
     clipped = [
         max(0.0, min(float(width), x1)),
@@ -228,7 +234,7 @@ def run_external_evaluation(
                 "error": (
                     "; ".join(candidate_errors)
                     if candidate_errors
-                    else None
+                    else ("no_candidate" if not candidates else None)
                 ),
             }
             sink.write(

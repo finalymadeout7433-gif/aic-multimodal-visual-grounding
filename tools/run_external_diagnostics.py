@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--dtype", choices=("float16", "float32"), default="float16")
+    parser.add_argument("--dtype", choices=("float16", "float32"))
     parser.add_argument("--box-threshold", type=float, default=0.15)
     parser.add_argument("--text-threshold", type=float, default=0.15)
     parser.add_argument("--max-candidates", type=int, default=20)
@@ -68,16 +68,22 @@ def main() -> int:
     args = parse_args()
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for external diagnostics")
-    dtype = torch.float16 if args.dtype == "float16" else torch.float32
+    resolved_dtype = args.dtype or (
+        "float32" if args.model == "grounding-dino" else "float16"
+    )
+    dtype = torch.float16 if resolved_dtype == "float16" else torch.float32
     records = read_jsonl(args.subset)
     if args.limit is not None:
         records = records[: args.limit]
     fingerprint = {
         "model": args.model,
         "model_path_name": args.model_path.name,
+        "model_weights_sha256": sha256_file(
+            args.model_path / "model.safetensors"
+        ),
         "subset_sha256": sha256_file(args.subset),
         "record_limit": args.limit,
-        "dtype": args.dtype,
+        "dtype": resolved_dtype,
         "box_threshold": (
             args.box_threshold if args.model == "grounding-dino" else None
         ),

@@ -43,6 +43,25 @@ class RuntimeFailurePredictor:
         raise RuntimeError("CUDA out of memory")
 
 
+class NoCandidatePredictor:
+    model_name = "empty"
+
+    def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
+        return ExternalPrediction(raw_output="none", candidates=[])
+
+
+class NonFinitePredictor:
+    model_name = "nan"
+
+    def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
+        return ExternalPrediction(
+            raw_output="nan",
+            candidates=[
+                ModelCandidate([0.0, 0.0, float("nan"), 1.0], "bad", None)
+            ],
+        )
+
+
 def _record(tmp_path: Path) -> dict[str, object]:
     image = tmp_path / "images" / "sample.jpg"
     image.parent.mkdir(exist_ok=True)
@@ -141,6 +160,37 @@ def test_external_eval_runtime_error_aborts_without_creating_candidate(
             predictor=RuntimeFailurePredictor(),
             output_dir=output,
             run_fingerprint={"model": "broken"},
+        )
+
+    assert (output / "predictions.jsonl").read_text(encoding="utf-8") == ""
+
+
+def test_external_eval_no_candidate_is_an_explicit_error(tmp_path: Path) -> None:
+    output = tmp_path / "run"
+    result = run_external_evaluation(
+        records=[_record(tmp_path)],
+        data_root=tmp_path,
+        predictor=NoCandidatePredictor(),
+        output_dir=output,
+        run_fingerprint={"model": "empty"},
+    )
+
+    record = json.loads(
+        (output / "predictions.jsonl").read_text(encoding="utf-8")
+    )
+    assert record["error"] == "no_candidate"
+    assert result["overall"]["no_candidate_rate"] == 1.0
+
+
+def test_external_eval_non_finite_candidate_aborts(tmp_path: Path) -> None:
+    output = tmp_path / "run"
+    with pytest.raises(RuntimeError, match="NaN or infinity"):
+        run_external_evaluation(
+            records=[_record(tmp_path)],
+            data_root=tmp_path,
+            predictor=NonFinitePredictor(),
+            output_dir=output,
+            run_fingerprint={"model": "nan"},
         )
 
     assert (output / "predictions.jsonl").read_text(encoding="utf-8") == ""

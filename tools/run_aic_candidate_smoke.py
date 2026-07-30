@@ -84,7 +84,7 @@ def main() -> int:
     predictor = GroundingDinoExternalPredictor(
         model_path=args.model_path,
         device="cuda",
-        dtype=torch.float16,
+        dtype=torch.float32,
         box_threshold=0.15,
         text_threshold=0.15,
         max_candidates=20,

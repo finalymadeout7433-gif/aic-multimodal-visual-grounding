@@ -19,6 +19,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--florence-analysis", type=Path, required=True)
     parser.add_argument("--tile-dir", type=Path, required=True)
     parser.add_argument("--gdino-dir", type=Path)
+    parser.add_argument("--official-sample-tile-summary", type=Path)
     parser.add_argument("--aic-smoke-summary", type=Path)
     parser.add_argument("--model-manifest", type=Path, required=True)
     parser.add_argument("--output-summary", type=Path, required=True)
@@ -114,6 +115,14 @@ def main() -> int:
         aic_smoke = json.loads(
             args.aic_smoke_summary.read_text(encoding="utf-8")
         )
+    official_sample_tile = None
+    if (
+        args.official_sample_tile_summary
+        and args.official_sample_tile_summary.exists()
+    ):
+        official_sample_tile = json.loads(
+            args.official_sample_tile_summary.read_text(encoding="utf-8")
+        )
 
     gdino_top1 = (
         gdino_summary["overall"]["selected_acc_at_05"]
@@ -166,6 +175,7 @@ def main() -> int:
         "tile": {
             "summary": tile_summary,
             "comparison": tile_comparison,
+            "official_sample": official_sample_tile,
         },
         "grounding_dino": {
             "completed_full_core": gdino_complete,
@@ -201,6 +211,19 @@ def main() -> int:
         f"- 源 validation 清单哈希："
         f"`{subset['source_manifest_sha256']}`。",
         "",
+        "### 环境与模型身份",
+        "",
+        f"- Python `{models['environment']['python']}`，PyTorch "
+        f"`{models['environment']['torch']}`，Transformers "
+        f"`{models['environment']['transformers']}`；GPU "
+        f"`{models['environment']['cuda_device']}`。",
+        f"- Florence 权重 SHA-256："
+        f"`{models['florence']['weights']['sha256']}`；本地快照没有暴露"
+        "源 commit，因此哈希是本轮不可变身份。",
+        f"- GroundingDINO revision："
+        f"`{models['grounding_dino']['revision']}`；权重 SHA-256："
+        f"`{models['grounding_dino']['weights']['sha256']}`。",
+        "",
         "## 3. Florence full-image first 与 oracle",
         "",
         f"- first ACC@0.5：{f['selected_acc_at_05']:.4f}",
@@ -213,6 +236,8 @@ def main() -> int:
         f"- 平均延迟：{f['latency_ms_mean']:.1f} ms",
         f"- GPU 峰值分配显存："
         f"{florence_summary['execution']['cuda_peak_allocated_bytes'] / 2**30:.2f} GiB",
+        f"- 完整 1,500 条墙钟时间："
+        f"{florence_summary['execution']['wall_seconds_this_run'] / 60:.2f} 分钟",
         "",
         "候选结果计数：",
         "",
@@ -260,7 +285,29 @@ def main() -> int:
             f"{t_control['full_plus_tile_candidate_count_mean']:.2f} | "
             f"{t_control['latency_multiplier']:.2f}× |",
             "",
+            f"Tile 600 条墙钟时间："
+            f"{tile_summary['execution']['wall_seconds_this_run'] / 60:.2f} "
+            "分钟；无候选 1 条。",
+            "",
+        ]
+    )
+    if official_sample_tile:
+        sample = official_sample_tile["overall"]
+        lines.extend(
+            [
+                "官方 `000108_001` 极小灯泡仅作 sanity：full+tile 共得到 "
+                f"{sample['candidate_count_mean']:.0f} 个候选，oracle IoU "
+                f"{sample['best_candidate_iou_mean']:.4f}，仍未定位成功。",
+                "",
+            ]
+        )
+    lines.extend(
+        [
             "## 6. GroundingDINO-Tiny",
+            "",
+            "- fp16 smoke 在首条前向即因文本增强层 Float/Half dtype "
+            "不一致而中止；没有写入候选或 fallback。",
+            "- 后续结果使用独立的 fp32 配置，不与失败的 fp16 运行混写。",
             "",
         ]
     )
@@ -282,6 +329,9 @@ def main() -> int:
                 f"- 无候选率：{g['no_candidate_rate']:.4f}",
                 f"- 平均候选数：{g['candidate_count_mean']:.3f}",
                 f"- 平均延迟：{g['latency_ms_mean']:.1f} ms",
+                f"- 完整评测墙钟时间："
+                f"{gdino_summary['execution']['wall_seconds_this_run'] / 60:.2f} "
+                "分钟",
             ]
         )
     else:
@@ -315,10 +365,26 @@ def main() -> int:
             "",
             "## 8. 下一步训练与提交建议",
             "",
-            "下一回合应严格按上面的固定阈值选择单变量实验。本地外部数据可能"
-            "与模型预训练集重叠，因此绝对分数只用于回归；AIC 平台分数仍是"
-            "目标域证据。建议一次只提交一种变化，保留 Florence RGB-only "
-            "0.4980 作为平台基线。",
+            "1. 下一轮优先训练/开发候选重排器，而不是直接微调 "
+            "GroundingDINO。GroundingDINO top-10 的召回上限很高，但 top-1 "
+            "明显较弱，说明主要缺口是排序。",
+            "2. 第一阶段用外部 train/validation 生成 top-10 候选，以 GT IoU "
+            "构造候选级监督；输入至少包含模型 score、bbox 几何、Query 类型、"
+            "候选 label 与 Query 的角色关系。先做轻量 ranking/MLP，再决定"
+            "是否引入视觉 crop 编码器。",
+            "3. Florence 的同 label 多实例最值得先做保守选择：在明确包含 "
+            "left/right/top/bottom/largest/smallest/ordinal 的 Query 上按几何"
+            "关系排序。不同 label 候选不能直接当成等价目标做无约束相似度排序。",
+            "4. Tile 只进入选择性策略：优先用于小目标、原模型无候选或低召回"
+            "类别；不建议对 9,555 条全部运行，官方极小灯泡样例也证明 Tile "
+            "不能解决所有极小目标。",
+            "5. 推荐的下一次单变量平台提交，是经过外部验证的 Florence "
+            "同-label/显式空间词保守重排；不要直接提交纯 GroundingDINO "
+            "top-1。随后再单独测试 GroundingDINO top-k + 学习式 reranker。",
+            "",
+            "本地外部数据可能与模型预训练集重叠，因此绝对分数只用于回归；"
+            "AIC 平台分数仍是目标域证据。每次只提交一种变化，并保留 "
+            "Florence RGB-only 0.4980 作为平台基线。",
             "",
             "## 9. 可复现性与产物",
             "",
