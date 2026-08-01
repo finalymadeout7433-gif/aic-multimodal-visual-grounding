@@ -13,6 +13,7 @@ from aic_baseline.florence import (
 from aic_baseline.model_adapters import (
     FlorenceExternalPredictor,
     FlorenceTileExternalPredictor,
+    GroundingDinoExternalPredictor,
     extract_grounding_dino_candidates,
 )
 
@@ -123,3 +124,53 @@ def test_grounding_dino_candidate_parser_rejects_non_finite_score() -> None:
 
     with pytest.raises(ValueError, match="finite"):
         extract_grounding_dino_candidates(result, max_candidates=20)
+
+
+def test_grounding_dino_adapter_accepts_official_custom_model_class(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    calls: dict[str, object] = {}
+
+    class FakeProcessorLoader:
+        @staticmethod
+        def from_pretrained(path, **kwargs):
+            calls["processor_path"] = path
+            calls["processor_kwargs"] = kwargs
+            return object()
+
+    class FakeModel:
+        def to(self, device):
+            calls["device"] = device
+            return self
+
+        def eval(self):
+            calls["eval"] = True
+
+    class FakeModelClass:
+        @staticmethod
+        def from_pretrained(path, **kwargs):
+            calls["model_path"] = path
+            calls["model_kwargs"] = kwargs
+            return FakeModel()
+
+    monkeypatch.setattr(
+        "aic_baseline.model_adapters.AutoProcessor",
+        FakeProcessorLoader,
+    )
+    predictor = GroundingDinoExternalPredictor(
+        model_path=tmp_path,
+        model_class=FakeModelClass,
+        model_load_kwargs={"use_safetensors": False},
+        device="cpu",
+        dtype=torch.float32,
+    )
+
+    assert predictor.model_path == tmp_path.resolve()
+    assert calls["model_path"] == tmp_path.resolve()
+    assert calls["model_kwargs"] == {
+        "local_files_only": True,
+        "dtype": torch.float32,
+        "use_safetensors": False,
+    }
+    assert calls["eval"] is True

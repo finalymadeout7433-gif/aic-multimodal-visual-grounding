@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 from PIL import Image
 import torch
@@ -193,6 +193,8 @@ class GroundingDinoExternalPredictor:
         self,
         *,
         model_path: Path | str,
+        model_class: type[Any] | None = None,
+        model_load_kwargs: Mapping[str, Any] | None = None,
         device: str = "cuda",
         dtype: torch.dtype = torch.float16,
         box_threshold: float = 0.15,
@@ -209,10 +211,13 @@ class GroundingDinoExternalPredictor:
             self.model_path,
             local_files_only=True,
         )
-        self.model = AutoModelForZeroShotObjectDetection.from_pretrained(
+        model_loader = model_class or AutoModelForZeroShotObjectDetection
+        extra_model_load_kwargs = dict(model_load_kwargs or {})
+        self.model = model_loader.from_pretrained(
             self.model_path,
             local_files_only=True,
             dtype=self.dtype,
+            **extra_model_load_kwargs,
         ).to(self.device)
         self.model.eval()
 
