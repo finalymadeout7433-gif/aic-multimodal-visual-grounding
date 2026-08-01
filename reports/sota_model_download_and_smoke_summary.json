@@ -62,13 +62,13 @@
       "top1_acc_at_05": 0.5333333333333333,
       "top10_oracle_acc_at_05": 0.95,
       "oracle_acc_at_05": 0.95,
-      "latency_ms_mean": 465.1956483340958
+      "latency_ms_mean": 394.2818216671488
     },
     "llmdet_swin_t": {
       "top1_acc_at_05": 0.45,
       "top10_oracle_acc_at_05": 0.9333333333333333,
       "oracle_acc_at_05": 0.95,
-      "latency_ms_mean": 492.2606833325214
+      "latency_ms_mean": 395.7377733337732
     },
     "candidate_union_oracle_acc_at_05": 0.95,
     "selected_bbox_agreement_at_05": 0.8333333333333334

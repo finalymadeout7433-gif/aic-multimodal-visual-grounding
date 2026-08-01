@@ -29,6 +29,11 @@ def parse_args() -> argparse.Namespace:
         required=True,
     )
     parser.add_argument("--model-path", type=Path, required=True)
+    parser.add_argument(
+        "--model-name",
+        required=True,
+        help="Exact model identity recorded in the evaluation summary.",
+    )
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--subset", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -52,6 +57,23 @@ def parse_args() -> argparse.Namespace:
         help="Force pytorch_model.bin instead of model.safetensors.",
     )
     return parser.parse_args()
+
+
+def _selected_model_weight_path(args: argparse.Namespace) -> Path:
+    filename = "pytorch_model.bin" if args.use_pytorch_bin else "model.safetensors"
+    path = args.model_path / filename
+    if not path.is_file():
+        raise FileNotFoundError(f"selected model weight does not exist: {path}")
+    return path
+
+
+def _model_runtime_asset_hashes(model_path: Path) -> dict[str, str]:
+    runtime_suffixes = {".json", ".model", ".txt"}
+    return {
+        path.name: sha256_file(path)
+        for path in sorted(model_path.iterdir(), key=lambda item: item.name)
+        if path.is_file() and path.suffix.lower() in runtime_suffixes
+    }
 
 
 def _build_predictor(args: argparse.Namespace, dtype: torch.dtype):
@@ -78,6 +100,7 @@ def _build_predictor(args: argparse.Namespace, dtype: torch.dtype):
         model_class = module.GroundingDinoForObjectDetection
     return GroundingDinoExternalPredictor(
         model_path=args.model_path,
+        model_name=args.model_name,
         model_class=model_class,
         model_load_kwargs=(
             {"use_safetensors": False} if args.use_pytorch_bin else None
@@ -101,12 +124,14 @@ def main() -> int:
     records = read_jsonl(args.subset)
     if args.limit is not None:
         records = records[: args.limit]
+    selected_weight_path = _selected_model_weight_path(args)
     fingerprint = {
         "model": args.model,
+        "model_name": args.model_name,
         "model_path_name": args.model_path.name,
-        "model_weights_sha256": sha256_file(
-            args.model_path / "model.safetensors"
-        ),
+        "model_weight_filename": selected_weight_path.name,
+        "model_weights_sha256": sha256_file(selected_weight_path),
+        "model_runtime_asset_sha256": _model_runtime_asset_hashes(args.model_path),
         "subset_sha256": sha256_file(args.subset),
         "record_limit": args.limit,
         "dtype": resolved_dtype,

@@ -24,6 +24,31 @@ def _module_available(name: str) -> bool:
     return importlib.util.find_spec(name) is not None
 
 
+def _language_branch_evidence(checkpoint_audit: dict) -> dict:
+    prefix = "model_vision.model_language.net"
+    prefix_summary = next(
+        (
+            row
+            for row in checkpoint_audit.get("largest_prefixes", [])
+            if row.get("prefix") == prefix
+        ),
+        None,
+    )
+    tensor_count = int(prefix_summary.get("tensor_count", 0)) if prefix_summary else 0
+    return {
+        "prefix": prefix,
+        "tensor_count": tensor_count,
+        "branch_present": tensor_count > 0,
+        "strict_load_verified": False,
+        "interpretation": (
+            "the checkpoint contains a substantial language-model prefix, but "
+            "architectural completeness requires a strict model load in the official runtime"
+            if tensor_count > 0
+            else "the expected language-model prefix was not found"
+        ),
+    }
+
+
 def main() -> int:
     args = parse_args()
     repo = args.ape_repo.resolve()
@@ -61,21 +86,31 @@ def main() -> int:
         wsl_probe["configured"] = (
             completed.returncode == 0 and bool(completed.stdout.replace(b"\x00", b"").strip())
         )
+    system = platform.system()
     reasons: list[str] = []
-    if platform.system() == "Windows":
-        reasons.append("official APE/Detectron2 stack is Linux-first")
+    warnings: list[str] = []
+    if system == "Windows":
+        warnings.append("official APE/Detectron2 stack is Linux-first")
     for dependency in ("detectron2", "detrex"):
         if not dependencies[dependency]:
             reasons.append(f"missing Python dependency: {dependency}")
     if not compiled_extensions:
         reasons.append("APE custom C++/CUDA extension ape._C is not built")
-    if toolchain["cl"] is None or toolchain["nvcc"] is None:
-        reasons.append("MSVC and/or CUDA Toolkit compiler is unavailable")
-    if not wsl_probe["configured"] and toolchain["docker"] is None:
-        reasons.append("no local Linux compatibility runtime was found")
+        if system == "Windows" and (
+            toolchain["cl"] is None or toolchain["nvcc"] is None
+        ):
+            reasons.append("MSVC and/or CUDA Toolkit compiler is unavailable")
+        elif system == "Linux" and toolchain["nvcc"] is None:
+            reasons.append("CUDA Toolkit compiler is unavailable")
+    language_evidence = _language_branch_evidence(checkpoint_audit)
 
     result = {
-        "status": "blocked_native_runtime" if reasons else "ready",
+        "status": (
+            "blocked_native_runtime"
+            if reasons
+            else "prerequisites_detected_unverified"
+        ),
+        "strict_runtime_load_verified": False,
         "python": sys.version,
         "platform": platform.platform(),
         "torch_version": torch.__version__,
@@ -86,18 +121,14 @@ def main() -> int:
         "toolchain": toolchain,
         "wsl_probe": wsl_probe,
         "compiled_ape_extensions": compiled_extensions,
-        "checkpoint_includes_language_branch": (
-            int(checkpoint_audit.get("language_related_key_count", 0)) > 0
-        ),
+        "checkpoint_language_branch_evidence": language_evidence,
         "checkpoint_language_tensor_count": checkpoint_audit.get(
             "language_related_key_count"
         ),
-        "external_eva_clip_bootstrap_can_be_skipped_in_derived_config": True,
-        "external_eva_clip_skip_evidence": (
-            "the final checkpoint contains the complete model_language branch; "
-            "the official LazyConfig cache_dir can be set to null before loading it"
-        ),
+        "external_eva_clip_bootstrap_can_be_skipped": None,
+        "external_eva_clip_skip_status": "pending_official_runtime_strict_load",
         "runtime_blockers": reasons,
+        "runtime_warnings": warnings,
         "recommended_runtime": (
             "Linux or WSL2 with the official pinned Detectron2, Detrex, "
             "PyTorch and CUDA build chain"

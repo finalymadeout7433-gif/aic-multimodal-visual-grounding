@@ -27,6 +27,12 @@ def compare_runs(
     left_name: str,
     right_name: str,
 ) -> dict[str, Any]:
+    left_ids = [str(row["query_id"]) for row in left_records]
+    right_ids = [str(row["query_id"]) for row in right_records]
+    if len(left_ids) != len(set(left_ids)):
+        raise ValueError("left run contains duplicate Query IDs")
+    if len(right_ids) != len(set(right_ids)):
+        raise ValueError("right run contains duplicate Query IDs")
     left = {str(row["query_id"]): row for row in left_records}
     right = {str(row["query_id"]): row for row in right_records}
     if set(left) != set(right):

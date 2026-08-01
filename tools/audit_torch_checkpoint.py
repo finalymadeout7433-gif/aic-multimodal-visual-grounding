@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import pickle
 from collections import Counter
 from pathlib import Path
 from typing import Any, Mapping
@@ -110,7 +111,7 @@ def main() -> int:
     try:
         checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
         safe_load_mode = "weights_only"
-    except Exception as error:
+    except pickle.UnpicklingError as error:
         if not args.trusted_source:
             raise RuntimeError(
                 "safe weights-only loading failed; verify the official source and rerun "

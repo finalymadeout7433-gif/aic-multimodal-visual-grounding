@@ -8,7 +8,7 @@
 
 - **MM-Grounding-DINO-T 已完整跑通**，是本轮三个候选中最适合继续扩展验证的可训练基座。
 - **LLMDet-Swin-T 已跑通**，但固定 60 条小型探针上没有超过 MM-Grounding-DINO-T，也没有提供候选并集增益，因此暂不作为第一主线。
-- **APE-Ti 权重完整且自带语言分支**，但官方实现依赖 Detectron2、Detrex 和 `ape._C` 原生扩展；本机没有已配置的 WSL2/Linux、MSVC 与 CUDA Toolkit 编译链，因此只完成了权重结构测试，不能伪称完成了模型推理。
+- **APE-Ti 权重中存在规模可观的语言模型前缀**，但是否与当前配置严格完整匹配，仍需在官方运行栈中进行 strict load 验证。官方实现依赖 Detectron2、Detrex 和 `ape._C` 原生扩展；本机没有已配置的 WSL2/Linux、MSVC 与 CUDA Toolkit 编译链，因此只完成了权重结构测试，不能伪称完成了模型推理。
 
 当前建议不是直接训练或生成平台提交，而是先把 MM-Grounding-DINO-T 扩大到严格的多域验证，并另建 Linux/WSL2 环境完成 APE-Ti 公平对照。
 
@@ -50,8 +50,8 @@
 
 | 模型 | Top-1 ACC@0.5 | Top-10 Oracle | 全候选 Oracle | 平均推理延迟 |
 |---|---:|---:|---:|---:|
-| MM-Grounding-DINO-T | **0.5333** | **0.9500** | 0.9500 | 465 ms |
-| LLMDet-Swin-T | 0.4500 | 0.9333 | 0.9500 | 492 ms |
+| MM-Grounding-DINO-T | **0.5333** | **0.9500** | 0.9500 | 394 ms |
+| LLMDet-Swin-T | 0.4500 | 0.9333 | 0.9500 | 396 ms |
 
 两模型 Top-1 框在 83.33% 的样本上达到 IoU≥0.5 的相互一致；候选并集 Oracle 仍为 0.95，没有新增召回。MM-Grounding-DINO-T 有 7 条独有 Top-1 正确，LLMDet 有 2 条。
 
@@ -72,9 +72,9 @@ APE-Ti 权重结构测试通过：
 - 1,151 个 tensor；
 - 776,701,310 个参数；
 - 414 个语言相关 tensor；
-- 完整的 `model_vision.model_language.net` 已包含在最终 checkpoint 中。
+- `model_vision.model_language.net` 前缀下包含 390 个 tensor，说明语言分支权重确实存在。
 
-因此不需要再下载单独的 EVA-CLIP 预训练文件；在构建模型时可以把官方 LazyConfig 的 `cache_dir` 设为 `null`，再加载最终 checkpoint。
+但仅靠 key 和 tensor 数量不能证明它与当前配置严格完整匹配。是否可以跳过单独的 EVA-CLIP bootstrap，必须在 Linux/WSL2 官方环境中构建模型并检查 missing/unexpected keys 后再确认。
 
 当前不能运行推理的原因是官方 APE 栈需要：
 
@@ -101,4 +101,3 @@ APE-Ti 权重结构测试通过：
 - MM-Grounding-DINO-T 结果：`outputs/sota_model_smoke/mm_grounding_dino_t/probe_60/`
 - LLMDet-Swin-T 结果：`outputs/sota_model_smoke/llmdet_swin_t/probe_60_complete_safetensors/`
 - 两模型对照：`outputs/sota_model_smoke/model_probe_comparison.json`
-

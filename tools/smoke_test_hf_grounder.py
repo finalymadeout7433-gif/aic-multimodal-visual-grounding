@@ -90,6 +90,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
     predictor = GroundingDinoExternalPredictor(
         model_path=args.model_path,
+        model_name=args.model_name,
         model_class=model_class,
         model_load_kwargs=(
             {"use_safetensors": False} if args.use_pytorch_bin else None

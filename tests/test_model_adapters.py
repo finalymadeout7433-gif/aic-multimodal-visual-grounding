@@ -160,6 +160,7 @@ def test_grounding_dino_adapter_accepts_official_custom_model_class(
     )
     predictor = GroundingDinoExternalPredictor(
         model_path=tmp_path,
+        model_name="fushh7/llmdet_swin_tiny_hf",
         model_class=FakeModelClass,
         model_load_kwargs={"use_safetensors": False},
         device="cpu",
@@ -167,6 +168,7 @@ def test_grounding_dino_adapter_accepts_official_custom_model_class(
     )
 
     assert predictor.model_path == tmp_path.resolve()
+    assert predictor.model_name == "fushh7/llmdet_swin_tiny_hf"
     assert calls["model_path"] == tmp_path.resolve()
     assert calls["model_kwargs"] == {
         "local_files_only": True,

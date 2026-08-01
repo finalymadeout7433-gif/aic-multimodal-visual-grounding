@@ -193,6 +193,7 @@ class GroundingDinoExternalPredictor:
         self,
         *,
         model_path: Path | str,
+        model_name: str | None = None,
         model_class: type[Any] | None = None,
         model_load_kwargs: Mapping[str, Any] | None = None,
         device: str = "cuda",
@@ -202,6 +203,7 @@ class GroundingDinoExternalPredictor:
         max_candidates: int = 20,
     ) -> None:
         self.model_path = Path(model_path).resolve()
+        self.model_name = model_name or self.model_path.name
         self.device = torch.device(device)
         self.dtype = dtype
         self.box_threshold = float(box_threshold)

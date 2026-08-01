@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from tools.compare_grounder_runs import compare_runs
 
 
@@ -29,3 +31,13 @@ def test_compare_grounder_runs_reports_union_and_unique_correctness() -> None:
     assert result["candidate_union_oracle_acc_at_05"] == 1.0
     assert result["left_only_top1_correct"] == 1
     assert result["right_only_top1_correct"] == 1
+
+
+def test_compare_grounder_runs_rejects_duplicate_query_ids() -> None:
+    duplicated = [
+        _row("a", selected=True, oracle=True, box=[0.0, 0.0, 0.5, 0.5]),
+        _row("a", selected=False, oracle=False, box=[0.0, 0.0, 0.2, 0.2]),
+    ]
+
+    with pytest.raises(ValueError, match="left run contains duplicate"):
+        compare_runs(duplicated, duplicated[:1], left_name="left", right_name="right")
