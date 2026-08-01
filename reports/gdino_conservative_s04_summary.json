@@ -1,0 +1,275 @@
+{
+  "experiment": "gdino_conservative_s04",
+  "status": "platform_upload_ready",
+  "platform_scores": {
+    "florence_s01": 0.498,
+    "gdino_s02": 0.4938,
+    "unsafe_ranker_s03": 0.319,
+    "conservative_s04": null
+  },
+  "validation": {
+    "cache_records": 10000,
+    "evaluated_queries": 9994,
+    "no_candidate_records": 6,
+    "queries": 9994,
+    "baseline_acc_at_05": 0.5368220932559535,
+    "selected_acc_at_05": 0.5501300780468281,
+    "gain_pp": 1.3307984790874525,
+    "switch_count": 284,
+    "rescues": 161,
+    "harms": 28,
+    "baseline_mean_iou": 0.5360340828079718,
+    "selected_mean_iou": 0.5474448547436639,
+    "switch_rate": 0.02841705023013808,
+    "rescue_harm_ratio": 5.75,
+    "depth_switch_count": 0,
+    "selection_safety": {
+      "cross_canonical_label_switch_count": 0,
+      "reference_dominant_switch_count": 0,
+      "max_switched_area_ratio": 1.4845187461953344
+    },
+    "by_query_category": {
+      "action": {
+        "queries": 963,
+        "baseline_acc_at_05": 0.6375908618899273,
+        "selected_acc_at_05": 0.6396677050882659,
+        "gain_pp": 0.20768431983385255,
+        "switch_count": 13,
+        "rescues": 5,
+        "harms": 3
+      },
+      "attribute": {
+        "queries": 1563,
+        "baseline_acc_at_05": 0.6493921944977608,
+        "selected_acc_at_05": 0.6589891234804862,
+        "gain_pp": 0.9596928982725528,
+        "switch_count": 20,
+        "rescues": 16,
+        "harms": 1
+      },
+      "depth": {
+        "queries": 1751,
+        "baseline_acc_at_05": 0.4774414620217019,
+        "selected_acc_at_05": 0.4774414620217019,
+        "gain_pp": 0.0,
+        "switch_count": 0,
+        "rescues": 0,
+        "harms": 0
+      },
+      "ordinal": {
+        "queries": 414,
+        "baseline_acc_at_05": 0.27294685990338163,
+        "selected_acc_at_05": 0.34782608695652173,
+        "gain_pp": 7.48792270531401,
+        "switch_count": 66,
+        "rescues": 34,
+        "harms": 3
+      },
+      "other": {
+        "queries": 2180,
+        "baseline_acc_at_05": 0.6486238532110091,
+        "selected_acc_at_05": 0.6564220183486239,
+        "gain_pp": 0.7798165137614679,
+        "switch_count": 47,
+        "rescues": 25,
+        "harms": 8
+      },
+      "plural_group": {
+        "queries": 254,
+        "baseline_acc_at_05": 0.38188976377952755,
+        "selected_acc_at_05": 0.4094488188976378,
+        "gain_pp": 2.7559055118110236,
+        "switch_count": 15,
+        "rescues": 9,
+        "harms": 2
+      },
+      "spatial": {
+        "queries": 2869,
+        "baseline_acc_at_05": 0.44475426978041127,
+        "selected_acc_at_05": 0.4660160334611363,
+        "gain_pp": 2.126176368072499,
+        "switch_count": 123,
+        "rescues": 72,
+        "harms": 11
+      }
+    },
+    "policy": {
+      "ranker_margin_min": 0.5,
+      "gdino_score_drop_max": 0.1,
+      "max_area_ratio": 1.5,
+      "require_same_canonical_label": true,
+      "reject_reference_dominant": true,
+      "reject_depth_queries": true,
+      "search_best_passing_candidate": true
+    },
+    "acceptance": {
+      "passed": true,
+      "checks": {
+        "selected_acc_at_05": {
+          "actual": 0.5501300780468281,
+          "minimum": 0.55,
+          "passed": true
+        },
+        "gain_pp": {
+          "actual": 1.3307984790874525,
+          "minimum": 1.3,
+          "passed": true
+        },
+        "rescue_harm_ratio": {
+          "actual": 5.75,
+          "minimum": 5.0,
+          "passed": true
+        }
+      }
+    }
+  },
+  "holdout": {
+    "cache_records": 10000,
+    "evaluated_queries": 9989,
+    "no_candidate_records": 11,
+    "queries": 9989,
+    "baseline_acc_at_05": 0.5216738412253479,
+    "selected_acc_at_05": 0.5361898087896686,
+    "gain_pp": 1.4515967564320753,
+    "switch_count": 297,
+    "rescues": 180,
+    "harms": 35,
+    "baseline_mean_iou": 0.522975615846076,
+    "selected_mean_iou": 0.5353505614885458,
+    "switch_rate": 0.029732705976574233,
+    "rescue_harm_ratio": 5.142857142857143,
+    "depth_switch_count": 0,
+    "selection_safety": {
+      "cross_canonical_label_switch_count": 0,
+      "reference_dominant_switch_count": 0,
+      "max_switched_area_ratio": 1.475624251611059
+    },
+    "by_query_category": {
+      "action": {
+        "queries": 828,
+        "baseline_acc_at_05": 0.6280193236714976,
+        "selected_acc_at_05": 0.6292270531400966,
+        "gain_pp": 0.12077294685990338,
+        "switch_count": 8,
+        "rescues": 3,
+        "harms": 2
+      },
+      "attribute": {
+        "queries": 1317,
+        "baseline_acc_at_05": 0.6454062262718299,
+        "selected_acc_at_05": 0.6529992406985573,
+        "gain_pp": 0.7593014426727411,
+        "switch_count": 28,
+        "rescues": 16,
+        "harms": 6
+      },
+      "depth": {
+        "queries": 1856,
+        "baseline_acc_at_05": 0.5064655172413793,
+        "selected_acc_at_05": 0.5064655172413793,
+        "gain_pp": 0.0,
+        "switch_count": 0,
+        "rescues": 0,
+        "harms": 0
+      },
+      "ordinal": {
+        "queries": 610,
+        "baseline_acc_at_05": 0.2721311475409836,
+        "selected_acc_at_05": 0.33934426229508197,
+        "gain_pp": 6.721311475409836,
+        "switch_count": 88,
+        "rescues": 47,
+        "harms": 6
+      },
+      "other": {
+        "queries": 1887,
+        "baseline_acc_at_05": 0.640169581346052,
+        "selected_acc_at_05": 0.6475887652358241,
+        "gain_pp": 0.7419183889772125,
+        "switch_count": 34,
+        "rescues": 18,
+        "harms": 4
+      },
+      "plural_group": {
+        "queries": 226,
+        "baseline_acc_at_05": 0.4646017699115044,
+        "selected_acc_at_05": 0.48672566371681414,
+        "gain_pp": 2.2123893805309733,
+        "switch_count": 8,
+        "rescues": 6,
+        "harms": 1
+      },
+      "spatial": {
+        "queries": 3265,
+        "baseline_acc_at_05": 0.4355283307810107,
+        "selected_acc_at_05": 0.4581929555895865,
+        "gain_pp": 2.2664624808575806,
+        "switch_count": 131,
+        "rescues": 90,
+        "harms": 16
+      }
+    },
+    "policy": {
+      "ranker_margin_min": 0.5,
+      "gdino_score_drop_max": 0.1,
+      "max_area_ratio": 1.5,
+      "require_same_canonical_label": true,
+      "reject_reference_dominant": true,
+      "reject_depth_queries": true,
+      "search_best_passing_candidate": true
+    },
+    "acceptance": {
+      "passed": true,
+      "checks": {
+        "selected_acc_at_05": {
+          "actual": 0.5361898087896686,
+          "minimum": 0.536,
+          "passed": true
+        },
+        "gain_pp": {
+          "actual": 1.4515967564320753,
+          "minimum": 1.4,
+          "passed": true
+        },
+        "rescue_harm_ratio": {
+          "actual": 5.142857142857143,
+          "minimum": 4.5,
+          "passed": true
+        }
+      }
+    }
+  },
+  "aic_audit": {
+    "records": 9555,
+    "cache_records": 9555,
+    "switch_count": 164,
+    "switch_rate": 0.01716378859236002,
+    "bbox_differences_vs_s02": 164,
+    "bbox_difference_query_ids_sha256": "B9494A8572C9D47E9E5EC111710E2F04A7BF1EA392BB52CB2C3CA3374812F596",
+    "switches_by_query_category": {
+      "action": 5,
+      "attribute": 3,
+      "ordinal": 94,
+      "other": 12,
+      "plural_group": 3,
+      "spatial": 47
+    },
+    "depth_switch_count": 0,
+    "cross_canonical_label_switch_count": 0,
+    "reference_dominant_switch_count": 0,
+    "max_switched_area_ratio": 1.4866505469863338,
+    "fallback_count": 0,
+    "invalid_bbox_count": 0,
+    "missing_id_count": 0,
+    "non_bbox_difference_count": 0,
+    "s02_control_bbox_difference_count": 0,
+    "zip_entries": [
+      "predictions_submission.json"
+    ],
+    "zip_bad_member": null,
+    "acceptance_passed": true
+  },
+  "platform_zip": "outputs/gdino_conservative_s04/platform_upload_ready/S04_gdino_conservative_ltr_v1.zip",
+  "platform_zip_sha256": "002B2399AA14B66695C3DABE162FF63186519CD3E81E99ECCEC59CBC26FF2831",
+  "platform_uploaded": false
+}
