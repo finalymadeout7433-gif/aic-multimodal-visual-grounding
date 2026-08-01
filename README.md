@@ -8,6 +8,31 @@ Visible + Query → Florence-2-large-ft → 归一化 bbox → 提交 JSON/ZIP
 
 当前版本：`v0.2.1`。正式初赛数据没有 bbox，只用于推理，不用于训练。
 
+## 诊断与 Ranker 实验分支
+
+当前实验分支记录了两轮受控工作：
+
+1. Florence 候选上限、Tile 小目标与 GroundingDINO-Tiny 零样本诊断；
+2. GroundingDINO Top-10 + LightGBM Spatial LTR 候选排序训练。
+
+对应报告：
+
+- [诊断实验报告](reports/diagnostic_oracle_tile_gdino_round.md)
+- [Spatial LTR 训练报告](reports/gdino_spatial_ltr_v1_training_report.md)
+- [平台结果与负迁移复盘](reports/gdino_spatial_ltr_v1_platform_postmortem.md)
+- [排行榜记录](reports/leaderboard_results.md)
+
+平台结果必须和外部本地验证分开解释：
+
+| 系统 | 外部 holdout ACC@0.5 | AIC 平台 ACC@0.5 |
+|---|---:|---:|
+| Florence-2 RGB-only first | 未在本轮 holdout 重测 | **0.4980** |
+| GroundingDINO-Tiny Top-1 | 0.5211 | **0.4938** |
+| GroundingDINO + Spatial LTR | 0.6333 | **0.3190** |
+
+Spatial LTR 的外部提升没有迁移到 AIC，因此该模型被标记为研究失败，不是推荐提交。
+代码仍保留，用于复现负迁移、改进目标/参照物建模和设计保守切换消融。
+
 ## 安装
 
 ```powershell
@@ -114,4 +139,5 @@ reports/   实验、排行榜、数据和训练策略结论
 outputs/   本地输出，不上传 Git
 ```
 
-当前限制：尚未使用 Infrared、Depth、Query 改写或候选框重排序。
+当前限制：已实验 RGB 候选框重排序，但尚未使用 Infrared、Depth 或 Query 改写；
+现有 Spatial LTR 在 AIC 平台发生严重负迁移，不能作为生产提交策略。

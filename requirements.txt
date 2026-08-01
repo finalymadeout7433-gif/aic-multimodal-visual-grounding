@@ -4,3 +4,4 @@ accelerate==1.14.0
 Pillow==12.1.1
 PyYAML==6.0.3
 pytest==8.3.5
+lightgbm==4.6.0

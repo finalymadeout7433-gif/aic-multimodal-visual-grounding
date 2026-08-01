@@ -11,6 +11,7 @@ dependencies = [
   "numpy",
   "Pillow",
   "PyYAML",
+  "lightgbm==4.6.0",
   "torch",
   "transformers",
 ]

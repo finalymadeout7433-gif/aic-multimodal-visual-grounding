@@ -1,0 +1,58 @@
+seed: 20260731
+
+paths:
+  data_root: null
+  train_manifest: manifests/processed/rgb_core_v1_train.jsonl
+  validation_manifest: manifests/processed/rgb_core_v1_validation.jsonl
+  holdout_manifest: manifests/processed/rgb_core_v1_holdout.jsonl
+  aic_dataset_root: null
+  aic_queries: null
+  grounding_dino_model: null
+  florence_fallback_predictions: null
+  output_root: outputs/gdino_spatial_ltr_v1
+
+grounding_dino:
+  revision: a2bb814dd30d776dcf7e30523b00659f4f141c71
+  dtype: float32
+  box_threshold: 0.15
+  text_threshold: 0.15
+  max_candidates: 10
+  dedup_iou: 0.95
+
+subsets:
+  pilot_size: 20000
+  full_size: 50000
+  validation_size: 10000
+  holdout_size: 10000
+  pilot_image_cap: 2
+  full_image_cap: 3
+  evaluation_image_cap: 4
+  dev_fraction: 0.2
+
+ranker:
+  objective: lambdarank
+  metric: ndcg
+  eval_at: [1, 3, 5]
+  label_gain: [0, 1, 4, 5]
+  learning_rate: 0.03
+  n_estimators: 1200
+  lambdarank_truncation_level: 5
+  subsample: 0.8
+  subsample_freq: 1
+  colsample_bytree: 0.8
+  reg_lambda: 1.0
+  early_stopping_rounds: 100
+  deterministic: true
+  force_col_wise: true
+  n_jobs: 4
+  grid:
+    - {name: A, num_leaves: 15, min_child_samples: 100}
+    - {name: B, num_leaves: 31, min_child_samples: 100}
+    - {name: C, num_leaves: 31, min_child_samples: 50}
+    - {name: D, num_leaves: 63, min_child_samples: 100}
+  guard_margins: [0.0, 0.05, 0.1, 0.2, 0.3]
+
+promotion:
+  holdout_overall_gain: 0.02
+  spatial_ordinal_gain: 0.04
+  maximum_dataset_drop: 0.01
