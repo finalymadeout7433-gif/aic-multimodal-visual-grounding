@@ -1,0 +1,73 @@
+schema_version: 1
+experiment_name: aic_testset_profile_v1
+frozen_date: "2026-08-01"
+
+paths:
+  dataset_root: null
+  queries: null
+  s01_predictions: outputs/florence2_rgb_only_full/predictions.json
+  s02_predictions: outputs/gdino_spatial_ltr_v1/submissions/S02_gdino_top1_control/predictions_submission.json
+  s03_predictions: outputs/gdino_spatial_ltr_v1/submissions/S03_gdino_spatial_ltr_v1/predictions_submission.json
+  s04_predictions: outputs/gdino_conservative_s04/submissions/S04_gdino_conservative_ltr_v1/predictions_submission.json
+  candidate_cache: outputs/gdino_spatial_ltr_v1/candidate_cache/aic_test/candidates.jsonl
+  s03_debug: outputs/gdino_spatial_ltr_v1/submissions/selection_debug.jsonl
+  s04_debug: outputs/gdino_conservative_s04/aic/selection_debug.jsonl
+  research_word_report: null
+  output_root: outputs/aic_testset_profile_v1
+  report_root: reports/aic_testset_profile_v1
+
+external_manifests:
+  refcoco: null
+  refcoco_plus: null
+  refcocog: null
+  grefcoco: null
+  sorec: null
+  rgbt_groundbench: null
+
+expected_counts:
+  queries: 9555
+  image_groups: 2000
+
+expected_sha256:
+  queries: null
+  s01_predictions: null
+  s02_predictions: null
+  s03_predictions: null
+  s04_predictions: null
+  candidate_cache: E87C5128A8E3005E501C3626D2366B5F9861F0632AA2B010AB076E21B779B225
+  s03_debug: null
+  s04_debug: null
+  research_word_report: null
+
+probe:
+  seed: 20260801
+  per_group: 100
+  stage2_max_queries: 200
+
+scale_probe:
+  enabled: true
+  model_path: null
+  model_revision: a2bb814dd30d776dcf7e30523b00659f4f141c71
+  expected_model_weights_sha256: 1A2412EF99BD74BCD3C2A246FA1E48581F8889A1300C9051974741314FC042F3
+  device: cuda
+  dtype: float32
+  box_threshold: 0.15
+  text_threshold: 0.15
+  max_candidates: 10
+  dedup_iou: 0.95
+  high_resolution_shortest_edge: 1024
+  high_resolution_longest_edge: 1706
+  tile_overlap: 0.20
+  inter_query_cooldown_seconds: 2.0
+  stage2_inter_query_cooldown_seconds: 5.0
+
+frozen_trigger_thresholds:
+  piza_high_small_ratio: 0.15
+  piza_high_plus_medium_ratio: 0.30
+  piza_scale_gain_pp: 10.0
+  ape_region_ratio: 0.10
+  ape_region_all_disagree_ratio: 0.40
+  rgbt_low_light_ratio: 0.15
+  rgbt_usable_ir_ratio: 0.80
+  depth_relation_ratio: 0.15
+  depth_rgb_stability_ratio: 0.50
