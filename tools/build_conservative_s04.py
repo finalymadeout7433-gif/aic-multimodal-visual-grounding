@@ -14,13 +14,15 @@ from typing import Any, Mapping, Sequence
 import yaml
 
 from aic_baseline.bbox import validate_normalized_bbox
+from aic_baseline.conservative_artifacts import (
+    evaluate_conservative_policy,
+    write_conservative_submission,
+)
 from aic_baseline.conservative_selector import (
     ConservativeSelectionResult,
     ConservativeSwitchPolicy,
-    evaluate_conservative_policy,
     is_depth_query,
     select_conservative_predictions,
-    write_conservative_submission,
 )
 from aic_baseline.diagnostics import write_jsonl
 from aic_baseline.external_data import sha256_file
@@ -97,14 +99,10 @@ def _public_path(path: Path) -> str:
 
 
 def _code_fingerprints() -> dict[str, str]:
-    paths = (
-        REPO_ROOT / "src/aic_baseline/bbox.py",
-        REPO_ROOT / "src/aic_baseline/conservative_selector.py",
-        REPO_ROOT / "src/aic_baseline/ranker_features.py",
-        REPO_ROOT / "src/aic_baseline/ranker_training.py",
-        REPO_ROOT / "src/aic_baseline/submission.py",
+    paths = [
+        *sorted((REPO_ROOT / "src/aic_baseline").glob("*.py")),
         Path(__file__).resolve(),
-    )
+    ]
     return {
         path.relative_to(REPO_ROOT).as_posix(): sha256_file(path)
         for path in paths
@@ -112,7 +110,9 @@ def _code_fingerprints() -> dict[str, str]:
 
 
 def _verify_inputs(
-    config: Mapping[str, Any], paths: Mapping[str, Path]
+    config: Mapping[str, Any],
+    paths: Mapping[str, Path],
+    config_path: Path,
 ) -> dict[str, Any]:
     expected_hashes = config["expected_sha256"]
     fingerprints: dict[str, Any] = {}
@@ -162,6 +162,12 @@ def _verify_inputs(
         )
     code = _code_fingerprints()
     return {
+        "configuration": {
+            "path": str(config_path),
+            "bytes": config_path.stat().st_size,
+            "sha256": sha256_file(config_path),
+            "canonical_payload_sha256": _canonical_sha256(config),
+        },
         "inputs": fingerprints,
         "candidate_fingerprint": actual_fingerprint,
         "candidate_fingerprint_verified_fields": sorted(
@@ -208,23 +214,28 @@ def _validate_evaluation(
     return {"passed": True, "checks": checks}
 
 
-def _read_aic_queries(path: Path) -> dict[str, dict[str, Any]]:
+def _load_record_object(
+    path: Path, *, description: str
+) -> dict[str, dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8-sig"))
     if not isinstance(payload, dict):
-        raise ValueError("AIC queries JSON must contain an object")
+        raise ValueError(f"{description} JSON must contain an object")
     records: dict[str, dict[str, Any]] = {}
     for query_id, record in payload.items():
         if not isinstance(record, dict):
-            raise ValueError(f"AIC query is not an object: {query_id}")
+            raise ValueError(
+                f"{description} record is not an object: {query_id}"
+            )
         records[str(query_id)] = dict(record)
     return records
 
 
+def _read_aic_queries(path: Path) -> dict[str, dict[str, Any]]:
+    return _load_record_object(path, description="AIC queries")
+
+
 def _load_submission(path: Path) -> dict[str, dict[str, Any]]:
-    payload = json.loads(path.read_text(encoding="utf-8-sig"))
-    if not isinstance(payload, dict):
-        raise ValueError("submission JSON must contain an object")
-    return {str(key): dict(value) for key, value in payload.items()}
+    return _load_record_object(path, description="submission")
 
 
 def _same_non_bbox(
@@ -431,7 +442,7 @@ S04 没有重新训练任何模型，也没有修改候选生成。它只缩小 
 | Rescue / Harm | {validation['rescues']:,} / {validation['harms']:,} |
 | Rescue/Harm | {validation['rescue_harm_ratio']:.4f} |
 
-严格实现同时禁止 `query_category=depth`，因此结果可能比早期仅按 parser depth 的只读草案更保守；本报告以最终代码和验收结果为准。
+实施计划摘要中的先期只读回放写为 validation `0.55093 / 170/29`、holdout `0.53669 / 186/36`，但这些数字不能由最终书面安全门逐字复现。最终规格额外明确了 `query_category=depth` 也必须禁切换，并要求异常字段回退 Top-1；本次实现严格遵循这些最终门限，得到本报告两张表中的实际数值且通过计划中独立列出的验收下限。该差异作为规格内历史草案与最终实现的证据保留，不能把先期数字冒充为本次实际结果。
 
 ## 6. 外部 holdout 单次结果
 
@@ -445,7 +456,7 @@ S04 没有重新训练任何模型，也没有修改候选生成。它只缩小 
 | Rescue / Harm | {holdout['rescues']:,} / {holdout['harms']:,} |
 | Rescue/Harm | {holdout['rescue_harm_ratio']:.4f} |
 
-本轮没有使用 holdout 搜索阈值；只对预先冻结的唯一策略执行一次检查。
+本轮没有使用 holdout 搜索阈值，最终产物只采用预先冻结的唯一策略。代码审查期间为定位“先期回放表与最终书面安全门不一致”额外执行过只读语义对照；这些对照没有改变任何阈值、模型或最终策略。因此 holdout 没有参与模型选择，但“物理上仅执行一次”的理想过程已不能严格宣称，特在此保留审计边界。
 
 ## 7. AIC 无标签审计
 
@@ -508,7 +519,7 @@ def _write_upload_files(
 1. 上传文件：`{platform_zip.name}`
 2. 上传前 SHA-256：`{digest}`
 3. ZIP 内必须且只包含：`predictions_submission.json`
-4. 不要上传 `predictions_submission.zip` 以外的调试文件或模型文件。
+4. 不要上传除 `{platform_zip.name}` 以外的调试文件、内部 `predictions_submission.zip` 或模型文件。
 5. 本工具没有自动登录或上传比赛平台。
 
 平台返回后请填写：
@@ -553,7 +564,7 @@ def run(config_path: Path) -> dict[str, Any]:
     output_root = paths["output_root"]
     stage_results: dict[str, Any] = {}
 
-    fingerprints = _verify_inputs(config, paths)
+    fingerprints = _verify_inputs(config, paths, config_path.resolve())
     stage_results["verify-inputs"] = {"status": "completed"}
     output_root.mkdir(parents=True, exist_ok=True)
     policy = _policy(config)

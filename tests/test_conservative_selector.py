@@ -7,13 +7,15 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from aic_baseline.conservative_selector import (
-    ConservativeSwitchPolicy,
-    ConservativeSelectionResult,
+from aic_baseline.conservative_artifacts import (
     evaluate_conservative_policy,
+    write_conservative_submission,
+)
+from aic_baseline.conservative_selector import (
+    ConservativeSelectionResult,
+    ConservativeSwitchPolicy,
     select_conservative_candidate,
     select_conservative_predictions,
-    write_conservative_submission,
 )
 
 
@@ -245,6 +247,49 @@ def test_nonfinite_candidate_data_keeps_top1_and_is_audited() -> None:
 
     assert decision.selected_index == 0
     assert any("invalid_bbox" in reason for reason in decision.rejection_reasons)
+
+
+@pytest.mark.parametrize("query", [None, "", "   ", 123])
+def test_missing_or_non_string_query_keeps_top1(query: object) -> None:
+    record = _record()
+    record["query"] = query
+
+    decision = select_conservative_candidate(
+        record, [0.0, 1.0], ConservativeSwitchPolicy()
+    )
+
+    assert decision.selected_index == 0
+    assert "invalid_query" in decision.rejection_reasons
+
+
+@pytest.mark.parametrize(
+    "query_category",
+    [None, "", "   ", 123, "unknown_category"],
+)
+def test_missing_or_invalid_query_category_keeps_top1(
+    query_category: object,
+) -> None:
+    record = _record()
+    record["query_category"] = query_category
+
+    decision = select_conservative_candidate(
+        record, [0.0, 1.0], ConservativeSwitchPolicy()
+    )
+
+    assert decision.selected_index == 0
+    assert "invalid_query_category" in decision.rejection_reasons
+
+
+def test_missing_query_category_keeps_top1() -> None:
+    record = _record()
+    del record["query_category"]
+
+    decision = select_conservative_candidate(
+        record, [0.0, 1.0], ConservativeSwitchPolicy()
+    )
+
+    assert decision.selected_index == 0
+    assert "invalid_query_category" in decision.rejection_reasons
 
 
 def test_conservative_submission_is_byte_reproducible_and_single_entry(

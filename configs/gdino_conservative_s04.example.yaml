@@ -69,4 +69,3 @@ platform_baselines:
   florence_s01_acc_at_05: 0.4980
   gdino_s02_acc_at_05: 0.4938
   unsafe_ranker_s03_acc_at_05: 0.3190
-
