@@ -256,26 +256,32 @@ Holdout 仅允许单次检查；文件已存在时统一入口拒绝再次覆盖
 
 | 提交 | 平台分数 | 提交 ID | 时间 |
 |---|---:|---|---|
-| Florence S01 | 0.4980 | 待补 | 待补 |
-| GroundingDINO S02 | 待用户上传 | 待补 | 待补 |
-| GDINO + Ranker S03 | 待用户上传 | 待补 | 待补 |
+| Florence S01 | 0.4980 | `AIC-2026-34835309` | 2026-07-29 18:52:09 |
+| GroundingDINO S02 | 0.4938 | `AIC-2026-34835309` | 2026-08-01 01:09:49 |
+| GDINO + Ranker S03 | 0.3190 | `AIC-2026-34835309` | 2026-07-31 23:52:51 |
 
-回填后计算：
+平台真实增益：
 
 ```text
-Ranker 训练真实收益 = S03 - S02
-GroundingDINO 基座变化 = S02 - 0.4980
-相对首版系统收益 = S03 - 0.4980
+Ranker 训练真实收益 = 0.3190 - 0.4938 = -0.1748（-17.48 pp）
+GroundingDINO 基座变化 = 0.4938 - 0.4980 = -0.0042（-0.42 pp）
+相对首版系统收益 = 0.3190 - 0.4980 = -0.1790（-17.90 pp）
 ```
+
+因此本轮 Ranker 未通过目标域晋级。外部 holdout 的 +11.22 pp 是同分布结果，
+不能作为 AIC 提升证据。平台后验审计确认提交索引和 bbox 映射无错，主要问题是
+RefCOCO 尺度捷径、目标/参照物角色翻转、序数样本不足以及 `guard_margin=0.0`
+导致的激进切换。完整复盘见
+[`gdino_spatial_ltr_v1_platform_postmortem.md`](gdino_spatial_ltr_v1_platform_postmortem.md)。
 
 ## 14. 下一轮决策规则
 
-- 若 S03−S02 明显为正，先做 selective tile 或 crop/global-context embedding 消融；
-- 若 spatial/ordinal 本地提升明显、平台提升有限，优先检查 AIC 目标角色和 Query 翻译域偏移；
-- 若 S02/S03 均低于 Florence 0.4980，可尝试 Florence/GDINO 候选联合排序，而不是立即微调 GDINO；
-- 若 Top-10 recall failure 仍集中在小目标，再做 selective tile；
-- Depth late fusion 只服务 nearest/farthest/front/behind，PNG 与 JPG 深度域分开处理；
-- 只有候选 oracle 仍不足时，才把 GroundingDINO 本体微调提升为主线。
+- S03 已证实不能直接使用，正式参考系统回退到 Florence S01（0.4980）或 GDINO S02（0.4938）；
+- 下一次仅从 S02 做保守单变量切换：同目标标签、非参照物、score 降幅受限且面积倍率受限；
+- 移除或强正则化绝对 `area/log_area`，将参照物候选作为 hard negative；
+- 外部训练需补充长目标—关系—参照物表达、小目标与序数表达；当前训练集中 ordinal 仅 6.96%，而 AIC 为 22.09%；
+- 在没有 AIC GT 时，不再把 RefCOCO Top-10 oracle 当作 AIC oracle 的替代证据；
+- 先验证保守 Ranker 的平台安全性，再考虑 selective tile、Depth late fusion 或模型微调。
 
 ## 15. 运行时间、异常与最终验证
 
