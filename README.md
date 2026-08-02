@@ -33,6 +33,30 @@ Visible + Query → Florence-2-large-ft → 归一化 bbox → 提交 JSON/ZIP
 Spatial LTR 的外部提升没有迁移到 AIC，因此该模型被标记为研究失败，不是推荐提交。
 代码仍保留，用于复现负迁移、改进目标/参照物建模和设计保守切换消融。
 
+## 三个开源模型零训练全量对照
+
+APE-Ti、MM-Grounding-DINO-T 和 LLMDet-Swin-T 均已使用 Visible RGB 与原始
+英文 Query 完成 9,555 条 AIC 测试集零训练推理。三者均使用模型原生 Top-1，
+没有使用 AIC 图像、Query、候选框或伪标签训练。
+
+| 模型 | 基础定位 | AIC 平台 ACC@0.5 | 相对 Florence-2 |
+|---|---|---:|---:|
+| MM-Grounding-DINO-T | OpenMMLab 的可训练统一检测/grounding 基座 | **0.5011** | **+0.31 pp** |
+| Florence-2-large-ft | 当前 RGB-only 控制基线 | 0.4980 | — |
+| LLMDet-Swin-T | 在 MM-GDINO 上加入长描述/LLM 监督 | 0.4942 | -0.38 pp |
+| APE-Ti | 同时覆盖前景物体、background stuff 和区域描述 | 0.4424 | -5.56 pp |
+
+`0.4942` 的平台结果属于 LLMDet-Swin-T；MM-Grounding-DINO-T 的正确平台结果
+是 `0.5011`。该归属在 2026-08-02 根据用户提供的平台截图完成纠正。
+MM-Grounding-DINO-T 因此成为当前已验证的最高分单模型，但领先 Florence-2
+只有 0.31 个百分点，后续仍应采用单变量平台实验确认改动收益。
+
+对应资料：
+
+- [三模型基础资料、环境、权重指纹与全量报告](reports/aic_three_model_zero_shot_full_report.md)
+- [无标签预测行为对照](reports/aic_three_model_zero_shot_behavior.md)
+- [完整排行榜记录](reports/leaderboard_results.md)
+
 ## 安装
 
 ```powershell

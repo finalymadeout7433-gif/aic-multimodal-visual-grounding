@@ -9,10 +9,25 @@ APE-Ti、MM-Grounding-DINO-T 和 LLMDet-Swin-T 均已使用原始 AIC Visible RG
 Top-1，不使用外部验证集筛选、不做候选重排、不加入人工规则、不使用 AIC
 伪标签训练，也未自动上传平台。
 
+三份平台结果已经返回：MM-Grounding-DINO-T 为 **0.5011**，LLMDet-Swin-T 为
+**0.4942**，APE-Ti 为 **0.4424**。MM-Grounding-DINO-T 以 0.31 个百分点超过
+Florence-2 的 0.4980，成为当前最高分单模型控制基线。
+
 三份平台 ZIP 已通过统一审计：Query ID 精确一致、非 bbox 字段修改为 0、
 非法框为 0，且每个 ZIP 只包含一个 `predictions_submission.json`。
 最终包进一步统一为 LF JSON 和固定 ZIP 时间戳；相同预测在当前受控打包环境中
 重复生成时将得到逐字节一致的 ZIP。
+
+## 模型基础资料
+
+| 模型 | 论文/项目定位 | 当前使用权重 | 主要能力与本轮作用 | 官方来源 |
+|---|---|---|---|---|
+| APE-Ti | CVPR 2024 通用视觉感知模型 | APE-Ti 官方 checkpoint | 同时定位前景物体、background stuff 和区域描述；用于检验 AIC 区域/结构 Query 假设 | [APE](https://github.com/shenyunhang/APE) |
+| MM-Grounding-DINO-T | OpenMMLab 的统一开放词汇检测、Phrase Grounding 与 REC 基座 | `openmmlab-community/mm-grounding-dino-tiny-o365v1-goldg` | 训练配置与 T/B/L 权重完整；用于检验可复现 GDINO 改进是否迁移到 AIC | [MMDetection 配置](https://github.com/open-mmlab/mmdetection/tree/main/configs/mm_grounding_dino) |
+| LLMDet-Swin-T | CVPR 2025 Highlight 开放词汇检测器 | `fushh7/llmdet-swin-tiny-hf` 完整安全重封装 | 在 MM-GDINO 基础上加入长描述和大语言模型监督；用于检验语义监督是否改善 AIC 长 Query | [LLMDet](https://github.com/iSEE-Laboratory/LLMDet) |
+
+上述三模型在本轮都只接收 Visible RGB 和 Query。它们不是 AIC 完整 RGB、Infrared、
+Depth 多模态方案；本轮结果只比较 RGB grounding 基座能力。
 
 ## 平台上传包
 
@@ -30,6 +45,19 @@ outputs/aic_zero_shot_full_v1/platform_upload_ready/
 
 其中 `release_manifest.json` 记录源包、输出包、大小、Query 数与哈希；
 `SHA256SUMS.txt` 可用于上传前复核。
+
+## 平台结果
+
+| 模型 | AIC ACC@0.5 | 相对 Florence-2 | 平台记录时间 |
+|---|---:|---:|---|
+| MM-Grounding-DINO-T | **0.5011** | **+0.31 pp** | 2026-08-02 16:07:02 |
+| LLMDet-Swin-T | **0.4942** | -0.38 pp | 2026-08-02 14:44:19 |
+| APE-Ti | **0.4424** | -5.56 pp | 2026-08-02 13:29:14 |
+
+分数归属说明：最初曾因用户口头表述将 `0.4942` 误写为 MM-Grounding-DINO-T；
+用户随后提供新截图并纠正。正确映射是 `0.4942 = LLMDet-Swin-T`、
+`0.5011 = MM-Grounding-DINO-T`。三份模型目录、预测文件、哈希和提交 ZIP 从未
+混用，修正仅涉及平台结果的文字归属。
 
 ## 输入与推理边界
 
@@ -110,19 +138,19 @@ MM-Grounding-DINO-T 与 LLMDet-Swin-T 的输出高度相似，说明二者在 AI
 可能共享较强的候选偏好；APE-Ti 的输出更独立。这个结果只说明实验信息互补性，
 不能推出 APE 更好或更差。
 
-## 平台决策
+## 平台结论与下一步
 
-三份 ZIP 应作为三个独立单模型实验分别手动上传。若只能先上传一个，优先 APE-Ti：
-它与现有 GroundingDINO 系输出差异最大，能最快回答“区域/结构型通用 grounding
-模型是否更适合 AIC”。随后上传 MM-Grounding-DINO-T 和 LLMDet-Swin-T。
-
-只有平台 ACC 返回后才能确定最优基座：
-
-1. 最高分模型成为下一轮唯一控制基线；
-2. 下一轮只增加一个变量，例如 PIZA 小目标分支、提高分辨率或 Depth late fusion；
-3. 不在平台比较前训练 selector，也不将三个模型直接混合成一次提交；
-4. 若三个新模型均不超过 Florence 0.4980，则继续保留 Florence 为稳定基线，
-   并优先测试真正改变小目标机制的 PIZA，而不是继续更换相似的检测器。
+1. **MM-Grounding-DINO-T（0.5011）成为当前最高分单模型控制基线。** 它相对
+   Florence-2 的领先只有 0.31 pp，说明当前是小幅但真实的平台改进，不应夸大为
+   架构性突破。
+2. **LLMDet-Swin-T（0.4942）没有超过其 MM-GDINO 基座。** 本地两模型输出又
+   高度相似，因此当前没有证据支持直接扩大到 LLMDet-B/L 或启动全量训练。
+3. **APE-Ti（0.4424）明显落后。** AIC 区域/结构 Query 占比较高这一输入画像仍然
+   成立，但不能再由此推出 APE-Ti 是更优平台模型；无标签画像只能指出难点，不能
+   替代真实平台模型选择。
+4. 下一份平台实验继续坚持单变量原则。优先围绕 MM-Grounding-DINO-T 测试受控
+   backbone/分辨率变化，或测试真正改变 Grounding 机制的新基座；PIZA、IR、Depth
+   和新 selector 不得一次性混入同一提交。
 
 ## 机器产物
 
