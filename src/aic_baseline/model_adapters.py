@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import math
+from contextlib import nullcontext
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from PIL import Image
 import torch
@@ -198,6 +199,7 @@ class GroundingDinoExternalPredictor:
         model_load_kwargs: Mapping[str, Any] | None = None,
         device: str = "cuda",
         dtype: torch.dtype = torch.float16,
+        autocast_dtype: torch.dtype | None = None,
         box_threshold: float = 0.15,
         text_threshold: float = 0.15,
         max_candidates: int = 20,
@@ -206,9 +208,12 @@ class GroundingDinoExternalPredictor:
         self.model_name = model_name or self.model_path.name
         self.device = torch.device(device)
         self.dtype = dtype
+        self.autocast_dtype = autocast_dtype
         self.box_threshold = float(box_threshold)
         self.text_threshold = float(text_threshold)
         self.max_candidates = int(max_candidates)
+        self._cached_image: Image.Image | None = None
+        self._cached_image_inputs: dict[str, torch.Tensor] | None = None
         self.processor = AutoProcessor.from_pretrained(
             self.model_path,
             local_files_only=True,
@@ -225,34 +230,83 @@ class GroundingDinoExternalPredictor:
 
     @torch.inference_mode()
     def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
-        normalized_query = normalize_grounding_query(query)
-        inputs = self.processor(
-            images=image,
-            text=normalized_query,
-            return_tensors="pt",
-        )
+        return self.predict_batch(images=[image], queries=[query])[0]
+
+    @torch.inference_mode()
+    def predict_batch(
+        self,
+        *,
+        images: Sequence[Image.Image],
+        queries: Sequence[str],
+    ) -> list[ExternalPrediction]:
+        if len(images) != len(queries):
+            raise ValueError("images and queries must have the same length")
+        if not images:
+            return []
+        normalized_queries = [normalize_grounding_query(query) for query in queries]
+        if len(images) == 1:
+            if (
+                images[0] is not self._cached_image
+                or self._cached_image_inputs is None
+            ):
+                image_inputs = self.processor.image_processor(
+                    images=[images[0]],
+                    return_tensors="pt",
+                )
+                self._cached_image = images[0]
+                self._cached_image_inputs = dict(image_inputs)
+            text_inputs = self.processor.tokenizer(
+                normalized_queries,
+                return_tensors="pt",
+                padding=True,
+            )
+            inputs = {
+                **self._cached_image_inputs,
+                **dict(text_inputs),
+            }
+        else:
+            inputs = self.processor(
+                images=list(images),
+                text=normalized_queries,
+                return_tensors="pt",
+                padding=True,
+            )
         device_inputs: dict[str, torch.Tensor] = {}
         for key, value in inputs.items():
             if key == "pixel_values":
                 device_inputs[key] = value.to(self.device, dtype=self.dtype)
             else:
                 device_inputs[key] = value.to(self.device)
-        outputs = self.model(**device_inputs)
+        autocast_context = (
+            torch.autocast(
+                device_type=self.device.type,
+                dtype=self.autocast_dtype,
+            )
+            if self.autocast_dtype is not None
+            else nullcontext()
+        )
+        with autocast_context:
+            outputs = self.model(**device_inputs)
         processed = self.processor.post_process_grounded_object_detection(
             outputs,
             input_ids=device_inputs.get("input_ids"),
             threshold=self.box_threshold,
             text_threshold=self.text_threshold,
-            target_sizes=[(image.height, image.width)],
-        )[0]
-        candidates = extract_grounding_dino_candidates(
-            processed,
-            max_candidates=self.max_candidates,
+            target_sizes=[(image.height, image.width) for image in images],
         )
-        return ExternalPrediction(
-            raw_output={
-                "normalized_query": normalized_query,
-                "candidate_count": len(candidates),
-            },
-            candidates=candidates,
-        )
+        predictions: list[ExternalPrediction] = []
+        for normalized_query, result in zip(normalized_queries, processed):
+            candidates = extract_grounding_dino_candidates(
+                result,
+                max_candidates=self.max_candidates,
+            )
+            predictions.append(
+                ExternalPrediction(
+                    raw_output={
+                        "normalized_query": normalized_query,
+                        "candidate_count": len(candidates),
+                    },
+                    candidates=candidates,
+                )
+            )
+        return predictions
