@@ -3,9 +3,7 @@ from __future__ import annotations
 import argparse
 import ctypes
 import gc
-import hashlib
 import json
-import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -31,8 +29,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--checkpoint-sha256",
         help=(
-            "Preverified SHA-256 for the same NTFS checkpoint. Supplying it "
-            "avoids re-reading a multi-GB file through the WSL mount."
+            "Expected SHA-256 assertion. The checkpoint is always re-hashed "
+            "and the run stops if the assertion is stale."
         ),
     )
     parser.add_argument("--dataset-root", type=Path, required=True)
@@ -75,14 +73,6 @@ def skip_unused_eva_visual_bootstrap() -> None:
     eva02_clip_model._build_vision_tower = (
         lambda *args, **kwargs: DisposableVisionTower()
     )
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest().upper()
 
 
 @dataclass(frozen=True)
@@ -306,25 +296,8 @@ class ApeTiPredictor:
         return predictions
 
 
-def _git_commit(path: Path) -> str | None:
-    try:
-        return subprocess.check_output(
-            ["git", "-C", str(path), "rev-parse", "HEAD"],
-            text=True,
-        ).strip()
-    except (OSError, subprocess.CalledProcessError):
-        return None
-
-
 def main() -> int:
     args = parse_args()
-    if args.checkpoint_sha256 is not None:
-        normalized_hash = args.checkpoint_sha256.strip().upper()
-        if len(normalized_hash) != 64 or any(
-            character not in "0123456789ABCDEF" for character in normalized_hash
-        ):
-            raise ValueError("checkpoint-sha256 must be 64 hexadecimal characters")
-        args.checkpoint_sha256 = normalized_hash
     for path in (
         args.project_root,
         args.ape_root,
@@ -342,22 +315,38 @@ def main() -> int:
         finalize_aic_full_detection,
         run_aic_full_detection,
     )
+    from aic_baseline.provenance import (
+        git_repository_state,
+        hash_named_files,
+        sha256_file,
+        verify_file_sha256,
+    )
     dataset = FastAICDataset(
         dataset_root=args.dataset_root,
         queries_path=args.queries,
     )
+    checkpoint_sha256 = verify_file_sha256(
+        args.checkpoint,
+        expected_sha256=args.checkpoint_sha256,
+    )
+    ape_repository_state = git_repository_state(args.ape_root)
+    ape_runtime_files_sha256 = hash_named_files(
+        args.ape_root,
+        [
+            "ape/modeling/ape_deta/deformable_transformer_vl.py",
+            "ape/modeling/ape_deta/deformable_detr_segm_vl.py",
+        ],
+    )
     fingerprint = {
         "schema": "aic-zero-shot-full-v1",
         "model_name": "shenyunhang/APE-Ti",
-        "checkpoint_sha256": (
-            args.checkpoint_sha256.upper()
-            if args.checkpoint_sha256 is not None
-            else sha256_file(args.checkpoint)
-        ),
+        "checkpoint_sha256": checkpoint_sha256,
         "config_sha256": sha256_file(args.config),
         "queries_sha256": sha256_file(args.queries),
         "query_count": len(dataset),
-        "ape_commit": _git_commit(args.ape_root),
+        "ape_commit": ape_repository_state["head"],
+        "ape_repository_state": ape_repository_state,
+        "ape_runtime_files_sha256": ape_runtime_files_sha256,
         "ape_runtime_patch_sha256": sha256_file(
             args.project_root / "tools" / "wsl" / "ape_ti_rtx4060_cuda116.patch"
         ),

@@ -50,6 +50,8 @@ def test_build_platform_release_verifies_and_copies_three_packages(
     assert manifest["package_count"] == 3
     assert set(manifest["packages"]) == set(packages)
     assert (tmp_path / "ready" / "SHA256SUMS.txt").is_file()
+    guide = (tmp_path / "ready" / "UPLOAD_GUIDE.md").read_text(encoding="utf-8")
     for name in packages:
         assert (tmp_path / "ready" / name).read_bytes() == packages[name].read_bytes()
-
+        assert name in guide
+        assert manifest["packages"][name]["sha256"] in guide

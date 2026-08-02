@@ -11,14 +11,16 @@ Top-1，不使用外部验证集筛选、不做候选重排、不加入人工规
 
 三份平台 ZIP 已通过统一审计：Query ID 精确一致、非 bbox 字段修改为 0、
 非法框为 0，且每个 ZIP 只包含一个 `predictions_submission.json`。
+最终包进一步统一为 LF JSON 和固定 ZIP 时间戳；相同预测在当前受控打包环境中
+重复生成时将得到逐字节一致的 ZIP。
 
 ## 平台上传包
 
 | 模型 | 文件 | SHA-256 | 大小 |
 |---|---|---|---:|
-| APE-Ti | `AIC_APE_Ti_zero_shot_v1.zip` | `41B88426B4A4C5C0E0E31E5338D8A61A34E993CFC88C7470AFF99873E8656B95` | 402,169 bytes |
-| MM-Grounding-DINO-T | `AIC_MM_Grounding_DINO_T_zero_shot_v1.zip` | `BCAC73B02A7AB32EC21AB6702345E3DED5BC9FF2EA7551549A4972A60788D555` | 644,321 bytes |
-| LLMDet-Swin-T | `AIC_LLMDet_Swin_T_zero_shot_v1.zip` | `B6D98700BCA7D0CF337251E8746106E9062B5C23E719672FF7DB9C0E8F90772E` | 643,696 bytes |
+| APE-Ti | `AIC_APE_Ti_zero_shot_v1.zip` | `5618E32ED4A3CE0786C80004E98E8720A871A71C313965CBDBE14BC41B5B1189` | 402,169 bytes |
+| MM-Grounding-DINO-T | `AIC_MM_Grounding_DINO_T_zero_shot_v1.zip` | `302572F8E0922ACE40475F1D349BD9E5477022B16432C9E8B4254A1F4C5F599E` | 642,700 bytes |
+| LLMDet-Swin-T | `AIC_LLMDet_Swin_T_zero_shot_v1.zip` | `27090EDE56141789415E474951FEE6D991C5D5014179F925F4276BA2958E68D9` | 641,937 bytes |
 
 统一目录：
 
@@ -47,6 +49,10 @@ outputs/aic_zero_shot_full_v1/platform_upload_ready/
 - 官方 APE commit：`8c4920e2014d4818ec3ecafb7b526d896a659d1c`。
 - checkpoint SHA-256：
   `B5D793E960515A6D1AA4B8A55B61DA990B0B4184B510D3D7AD3BB37526FB8007`。
+- 权重已在完成后重新读取并核对 SHA-256；实际 APE 补丁目标文件、Git HEAD、
+  完整 tracked diff 和反向补丁检查另存于
+  `ape_ti/post_run_provenance_audit.json`。该文件属于完成后的只读复核，
+  不冒充原始运行时快照。
 - checkpoint 装载：0 missing / 0 unexpected / 0 incorrect shape，strict-equivalent。
 - 环境：WSL2 Ubuntu 22.04、Python 3.10.20、PyTorch 1.12.1+cu116。
 - 推理：FP16 autocast、batch size 1、bbox-only。
@@ -67,7 +73,7 @@ outputs/aic_zero_shot_full_v1/platform_upload_ready/
 - 推理：FP32、无 autocast、batch size 1。
 - 完成：9,555/9,555；耗时 9,270.12 秒；空候选 0；非法框 0。
 - 预测 JSON SHA-256：
-  `ABBA748CE3A76CCB215246E984F5267719865933805B68D925CA987EE83D38FB`。
+  `1DA3F5764A2B3F183BCC1E45A8675CC801E11BF77AEEBFA4D24CDEA6CC3C104F`。
 
 ### LLMDet-Swin-T
 
@@ -80,7 +86,7 @@ outputs/aic_zero_shot_full_v1/platform_upload_ready/
   代码自动回退到纯 PyTorch 实现；推理有效但速度较慢。
 - 完成：9,555/9,555；耗时 8,853.14 秒；空候选 0；非法框 0。
 - 预测 JSON SHA-256：
-  `968CEAFBD6E80258F9CC3089544EB77F9682E69118C11484DBA355A3A5F98A02`。
+  `97D2C75408DF951C9126BF3FA8F249B2157F7801687A2AED649E4BDF057346CE`。
 
 ## 无标签模型行为
 

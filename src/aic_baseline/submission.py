@@ -10,6 +10,22 @@ from typing import Any
 from .bbox import BBoxError, validate_normalized_bbox
 
 
+_CANONICAL_ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
+
+
+def _write_deterministic_zip_member(
+    archive: zipfile.ZipFile,
+    *,
+    name: str,
+    payload: bytes,
+) -> None:
+    info = zipfile.ZipInfo(filename=name, date_time=_CANONICAL_ZIP_TIMESTAMP)
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.create_system = 3
+    info.external_attr = 0o100644 << 16
+    archive.writestr(info, payload)
+
+
 class SubmissionError(ValueError):
     """提交记录不完整或 bbox 不合法。"""
 
@@ -45,10 +61,12 @@ def build_submission(
     zip_path = Path(output_zip)
     json_path.parent.mkdir(parents=True, exist_ok=True)
     zip_path.parent.mkdir(parents=True, exist_ok=True)
-    json_path.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
-    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        archive.write(json_path, arcname=json_path.name)
+    with json_path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+    with zipfile.ZipFile(zip_path, "w") as archive:
+        _write_deterministic_zip_member(
+            archive,
+            name=json_path.name,
+            payload=json_path.read_bytes(),
+        )
     return result

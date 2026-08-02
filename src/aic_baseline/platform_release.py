@@ -12,6 +12,11 @@ from .aic_full_detection import sha256_file
 from .bbox import validate_normalized_bbox
 
 
+def _write_text_lf(path: Path, text: str) -> None:
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(text)
+
+
 def _verify_package(
     *,
     path: Path,
@@ -70,13 +75,35 @@ def build_platform_release(
         "query_count_per_package": len(original_records),
         "packages": manifest_packages,
     }
-    (output / "release_manifest.json").write_text(
+    _write_text_lf(
+        output / "release_manifest.json",
         json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
     )
-    (output / "SHA256SUMS.txt").write_text(
+    _write_text_lf(
+        output / "SHA256SUMS.txt",
         "\n".join(checksum_lines) + "\n",
-        encoding="utf-8",
     )
+    guide_lines = [
+        "# AIC 三模型零训练提交上传说明",
+        "",
+        (
+            f"这三份 ZIP 均已完成 {len(original_records):,} 条 Query 的结构和 "
+            "bbox 合法性审计，可直接手动上传。"
+        ),
+        "",
+        "| 建议顺序 | 提交文件 | SHA-256 |",
+        "|---:|---|---|",
+    ]
+    for index, (name, audit) in enumerate(manifest_packages.items(), start=1):
+        guide_lines.append(f"| {index} | `{name}` | `{audit['sha256']}` |")
+    guide_lines.extend(
+        [
+            "",
+            "不要解压后重新压缩；直接上传本目录中的 ZIP。",
+            "上传后记录平台提交 ID、提交时间和 ACC@0.5。",
+            "平台分数返回前，不能依据预测框外观判断哪个模型更准确。",
+            "",
+        ]
+    )
+    _write_text_lf(output / "UPLOAD_GUIDE.md", "\n".join(guide_lines))
     return manifest
-

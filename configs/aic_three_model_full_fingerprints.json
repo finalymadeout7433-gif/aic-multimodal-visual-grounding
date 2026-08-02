@@ -1,0 +1,95 @@
+{
+  "ape_ti": {
+    "expected_query_count": 9555,
+    "fingerprint_sha256": "1FEC56F02776E3099085ABE5550D3CFFD31F4B130B5ED3685906081C2B2B8336",
+    "fingerprint": {
+      "schema": "aic-zero-shot-full-v1",
+      "model_name": "shenyunhang/APE-Ti",
+      "checkpoint_sha256": "B5D793E960515A6D1AA4B8A55B61DA990B0B4184B510D3D7AD3BB37526FB8007",
+      "config_sha256": "95E2C2A782A16086C3F723B5EF852EF66991B053C95B3CBFB1E7BFC2695FC5B7",
+      "queries_sha256": "2A08CD3A930D9749EDB86A8B420D8259DCE446116AD98D93338EDF8B3E1EF67C",
+      "query_count": 9555,
+      "score_threshold": 0.0,
+      "max_candidates": 20,
+      "batch_size": 1,
+      "selection_policy": "native_highest_score_top1",
+      "record_limit": null,
+      "training_on_aic": false,
+      "modalities": [
+        "visible_rgb",
+        "query_original"
+      ],
+      "bbox_only_inference": true,
+      "autocast_dtype": "float16"
+    },
+    "post_run_provenance_sha256": "DAB9DC93A2AC1BC91F95A8C222E79FA821C67BC7DD4F179832B0BC39CA8B07BD",
+    "post_run_provenance": {
+      "original_run_fingerprint_sha256": "1FEC56F02776E3099085ABE5550D3CFFD31F4B130B5ED3685906081C2B2B8336",
+      "checkpoint": {
+        "actual_sha256_recomputed": "B5D793E960515A6D1AA4B8A55B61DA990B0B4184B510D3D7AD3BB37526FB8007",
+        "matches_recorded_run_fingerprint": true
+      },
+      "ape_repository": {
+        "head": "8c4920e2014d4818ec3ecafb7b526d896a659d1c",
+        "tracked_diff_sha256": "78D1D76DC9DAAEC5D70452A973F186DEE0CEF45140C87E041C22F35847D85D5E",
+        "submodule_status": [],
+        "runtime_files_sha256": {
+          "ape/modeling/ape_deta/deformable_detr_segm_vl.py": "A3C9720548F36BC88CEFAF82244E0AB550BAAF44E4833A8C8E48EE68AC8FA31F",
+          "ape/modeling/ape_deta/deformable_transformer_vl.py": "6A3E3A6B71117AFD614CC3E89D326FC5E7F278CB3BC66C9A19AF79F52234B46B"
+        },
+        "runtime_patch_sha256": "D9CA6C5FAEA501E89DA60EC48D5E81AF78CA4F7996882185BD81C053DF5F9926",
+        "runtime_patch_reverse_check_passed": true
+      }
+    }
+  },
+  "llmdet_swin_t": {
+    "expected_query_count": 9555,
+    "fingerprint_sha256": "DFBF21F9812960ECD7F75746385040FE0AC3F45657D109EA164F8BC510B718D7",
+    "fingerprint": {
+      "schema": "aic-zero-shot-full-v1",
+      "model_name": "fushh7/llmdet-swin-tiny-hf",
+      "model_weights_sha256": "1D9E7CB0C53DB1A8EA6D26D23248247F489FBD6F64302821CCA64FB557653A3B",
+      "queries_sha256": "2A08CD3A930D9749EDB86A8B420D8259DCE446116AD98D93338EDF8B3E1EF67C",
+      "query_count": 9555,
+      "dtype": "float32",
+      "autocast_dtype": "none",
+      "device": "cuda",
+      "box_threshold": 0.0,
+      "text_threshold": 0.0,
+      "max_candidates": 20,
+      "batch_size": 1,
+      "selection_policy": "native_highest_score_top1",
+      "record_limit": null,
+      "training_on_aic": false,
+      "modalities": [
+        "visible_rgb",
+        "query_original"
+      ]
+    }
+  },
+  "mm_grounding_dino_t": {
+    "expected_query_count": 9555,
+    "fingerprint_sha256": "84862E33F4EE7B9C5D67C9C2B83C3840C17749E7D3C05D02C3EAD074F37D63E1",
+    "fingerprint": {
+      "schema": "aic-zero-shot-full-v1",
+      "model_name": "openmmlab-community/mm-grounding-dino-tiny-o365v1-goldg",
+      "model_weights_sha256": "2D9BDFD0247F167A00E00FFFA1DEC1EE5D5861FDFB4E27FD8CC2279AF6820688",
+      "queries_sha256": "2A08CD3A930D9749EDB86A8B420D8259DCE446116AD98D93338EDF8B3E1EF67C",
+      "query_count": 9555,
+      "dtype": "float32",
+      "autocast_dtype": "none",
+      "device": "cuda",
+      "box_threshold": 0.0,
+      "text_threshold": 0.0,
+      "max_candidates": 20,
+      "batch_size": 1,
+      "selection_policy": "native_highest_score_top1",
+      "record_limit": null,
+      "training_on_aic": false,
+      "modalities": [
+        "visible_rgb",
+        "query_original"
+      ]
+    }
+  }
+}
