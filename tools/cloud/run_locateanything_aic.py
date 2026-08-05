@@ -49,6 +49,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--scheduler", default="pipeline")
     parser.add_argument("--batch-size", type=int, default=1)
+    parser.add_argument(
+        "--max-image-side",
+        type=int,
+        default=None,
+        help=(
+            "Resize the image fed to LocateAnything so the longest side is at most "
+            "this value. Parsed 0-1000 coordinates are still mapped back to the "
+            "original image size for the AIC submission."
+        ),
+    )
     parser.add_argument("--limit", type=int)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--finalize", action="store_true")
@@ -78,6 +88,7 @@ class LocateAnythingPredictor:
         attn: str,
         vision_attn: str,
         scheduler: str,
+        max_image_side: int | None,
     ) -> None:
         from locateanything_worker import LocateAnythingWorker
 
@@ -93,6 +104,23 @@ class LocateAnythingPredictor:
             )
         self.model_name = model_path
         self.worker = LocateAnythingWorker(model_path, **kwargs)
+        self.max_image_side = max_image_side
+
+    def _model_image(self, image: Image.Image) -> Image.Image:
+        if self.max_image_side is None:
+            return image
+        if self.max_image_side <= 0:
+            raise ValueError("max_image_side must be positive")
+        width, height = image.size
+        longest = max(width, height)
+        if longest <= self.max_image_side:
+            return image
+        scale = self.max_image_side / float(longest)
+        resized = image.resize(
+            (max(1, round(width * scale)), max(1, round(height * scale))),
+            Image.Resampling.BICUBIC,
+        )
+        return resized
 
     @staticmethod
     def _label_for_box(answer: str, box_start: int, default: str) -> str:
@@ -104,13 +132,13 @@ class LocateAnythingPredictor:
         return label or default
 
     def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
-        raw = self.worker.ground_multi(image, query)
+        width, height = image.size
+        raw = self.worker.ground_multi(self._model_image(image), query)
         answer = raw.get("answer") if isinstance(raw, dict) else str(raw)
         if answer is None:
             answer = ""
         answer = str(answer)
         candidates: list[ModelCandidate] = []
-        width, height = image.size
         for index, match in enumerate(BOX_PATTERN.finditer(answer)):
             x1, y1, x2, y2 = [int(value) for value in match.groups()]
             pixel_bbox = [
@@ -158,6 +186,7 @@ def main() -> int:
         "vision_attn": args.vision_attn,
         "scheduler": args.scheduler,
         "record_limit": args.limit,
+        "max_image_side": args.max_image_side,
     }
 
     load_started = time.perf_counter()
@@ -167,6 +196,7 @@ def main() -> int:
         attn=args.attn,
         vision_attn=args.vision_attn,
         scheduler=args.scheduler,
+        max_image_side=args.max_image_side,
     )
     load_seconds = time.perf_counter() - load_started
     if torch is not None and torch.cuda.is_available():
