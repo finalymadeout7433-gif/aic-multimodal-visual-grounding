@@ -100,6 +100,29 @@ def _to_pixel_bbox(box: list[float], *, width: int, height: int) -> list[float]:
     return box
 
 
+def _sanitize_pixel_bbox(box: list[float], *, width: int, height: int) -> list[float] | None:
+    if len(box) != 4:
+        return None
+    values = [float(value) for value in box]
+    if any(value != value for value in values):
+        return None
+    x1, y1, x2, y2 = values
+    left, right = sorted((max(0.0, min(float(width), x1)), max(0.0, min(float(width), x2))))
+    top, bottom = sorted((max(0.0, min(float(height), y1)), max(0.0, min(float(height), y2))))
+    if right - left < 1.0 or bottom - top < 1.0:
+        return None
+    return [left, top, right, bottom]
+
+
+def _fallback_pixel_bbox(*, width: int, height: int) -> list[float]:
+    return [
+        width * 0.25,
+        height * 0.25,
+        width * 0.75,
+        height * 0.75,
+    ]
+
+
 class Qwen3VLPredictor:
     def __init__(
         self,
@@ -137,6 +160,8 @@ class Qwen3VLPredictor:
             "Return only one JSON object in this exact format: "
             "{\"bbox\":[x1,y1,x2,y2]}. "
             "Use normalized coordinates from 0 to 1. "
+            "Even if the target is hard to see or you are uncertain, choose the best approximate region. "
+            "Never answer that the object is absent. "
             "Do not include explanations. Query: "
             + query
         )
@@ -170,15 +195,31 @@ class Qwen3VLPredictor:
             clean_up_tokenization_spaces=False,
         )[0]
         width, height = image.size
-        bbox = _to_pixel_bbox(_extract_box(text), width=width, height=height)
+        source = "qwen3vl"
+        score = 1.0
+        try:
+            bbox = _sanitize_pixel_bbox(
+                _to_pixel_bbox(_extract_box(text), width=width, height=height),
+                width=width,
+                height=height,
+            )
+        except Exception as exc:  # noqa: BLE001 - preserve full-run progress on bad generations.
+            bbox = None
+            source = "qwen3vl_fallback_center"
+            score = 0.0
+            text = text + f"\n[PARSER_FALLBACK] {type(exc).__name__}: {exc}"
+        if bbox is None:
+            bbox = _fallback_pixel_bbox(width=width, height=height)
+            source = "qwen3vl_fallback_center"
+            score = 0.0
         return ExternalPrediction(
             raw_output={"text": text},
             candidates=[
                 ModelCandidate(
                     pixel_bbox=bbox,
                     label=query,
-                    score=1.0,
-                    source="qwen3vl",
+                    score=score,
+                    source=source,
                 )
             ],
         )
