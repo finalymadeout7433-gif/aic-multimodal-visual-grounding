@@ -33,6 +33,38 @@ REF_PATTERN = re.compile(r"<ref>(.*?)</ref>\s*<box>")
 FALLBACK_CENTER_PIXEL_BOX = [0.25, 0.25, 0.75, 0.75]
 
 
+def _fallback_pixel_bbox(width: int, height: int) -> list[float]:
+    return [
+        FALLBACK_CENTER_PIXEL_BOX[0] * width,
+        FALLBACK_CENTER_PIXEL_BOX[1] * height,
+        FALLBACK_CENTER_PIXEL_BOX[2] * width,
+        FALLBACK_CENTER_PIXEL_BOX[3] * height,
+    ]
+
+
+def _parsed_box_to_pixel(
+    values: list[int],
+    *,
+    width: int,
+    height: int,
+) -> list[float] | None:
+    x1, y1, x2, y2 = [float(value) for value in values]
+    left, right = sorted((x1, x2))
+    top, bottom = sorted((y1, y2))
+    left = max(0.0, min(1000.0, left))
+    right = max(0.0, min(1000.0, right))
+    top = max(0.0, min(1000.0, top))
+    bottom = max(0.0, min(1000.0, bottom))
+    if right - left < 1.0 or bottom - top < 1.0:
+        return None
+    return [
+        left / 1000.0 * width,
+        top / 1000.0 * height,
+        right / 1000.0 * width,
+        bottom / 1000.0 * height,
+    ]
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run LocateAnything-3B over the unlabeled AIC test set."
@@ -148,13 +180,13 @@ class LocateAnythingPredictor:
         answer = str(answer)
         candidates: list[ModelCandidate] = []
         for index, match in enumerate(BOX_PATTERN.finditer(answer)):
-            x1, y1, x2, y2 = [int(value) for value in match.groups()]
-            pixel_bbox = [
-                x1 / 1000.0 * width,
-                y1 / 1000.0 * height,
-                x2 / 1000.0 * width,
-                y2 / 1000.0 * height,
-            ]
+            pixel_bbox = _parsed_box_to_pixel(
+                [int(value) for value in match.groups()],
+                width=width,
+                height=height,
+            )
+            if pixel_bbox is None:
+                continue
             candidates.append(
                 ModelCandidate(
                     pixel_bbox=pixel_bbox,
@@ -166,12 +198,7 @@ class LocateAnythingPredictor:
         if not candidates:
             candidates.append(
                 ModelCandidate(
-                    pixel_bbox=[
-                        FALLBACK_CENTER_PIXEL_BOX[0] * width,
-                        FALLBACK_CENTER_PIXEL_BOX[1] * height,
-                        FALLBACK_CENTER_PIXEL_BOX[2] * width,
-                        FALLBACK_CENTER_PIXEL_BOX[3] * height,
-                    ],
+                    pixel_bbox=_fallback_pixel_bbox(width, height),
                     label=query,
                     score=-999.0,
                     source="locateanything_fallback_center",
