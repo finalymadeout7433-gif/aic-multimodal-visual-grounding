@@ -156,6 +156,10 @@ class LocateAnythingPredictor:
         return resized
 
     @staticmethod
+    def _ground_single_prompt(query: str) -> str:
+        return f"Locate a single instance that matches the following description: {query}."
+
+    @staticmethod
     def _label_for_box(answer: str, box_start: int, default: str) -> str:
         prefix = answer[:box_start]
         matches = list(REF_PATTERN.finditer(prefix + "<box>"))
@@ -164,16 +168,14 @@ class LocateAnythingPredictor:
         label = matches[-1].group(1).strip()
         return label or default
 
-    def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
-        width, height = image.size
-        model_image = self._model_image(image)
-        raw = self.worker.ground_single(model_image, query)
-        answer_probe = raw.get("answer") if isinstance(raw, dict) else str(raw)
-        if not BOX_PATTERN.search(str(answer_probe or "")):
-            raw = self.worker.ground_gui(model_image, query, output_type="box")
-            answer_probe = raw.get("answer") if isinstance(raw, dict) else str(raw)
-        if not BOX_PATTERN.search(str(answer_probe or "")):
-            raw = self.worker.ground_multi(model_image, query)
+    def _prediction_from_raw(
+        self,
+        *,
+        raw: Any,
+        query: str,
+        width: int,
+        height: int,
+    ) -> ExternalPrediction:
         answer = raw.get("answer") if isinstance(raw, dict) else str(raw)
         if answer is None:
             answer = ""
@@ -205,6 +207,67 @@ class LocateAnythingPredictor:
                 )
             )
         return ExternalPrediction(raw_output=raw, candidates=candidates)
+
+    def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
+        width, height = image.size
+        model_image = self._model_image(image)
+        raw = self.worker.ground_single(model_image, query)
+        answer_probe = raw.get("answer") if isinstance(raw, dict) else str(raw)
+        if not BOX_PATTERN.search(str(answer_probe or "")):
+            raw = self.worker.ground_gui(model_image, query, output_type="box")
+            answer_probe = raw.get("answer") if isinstance(raw, dict) else str(raw)
+        if not BOX_PATTERN.search(str(answer_probe or "")):
+            raw = self.worker.ground_multi(model_image, query)
+        return self._prediction_from_raw(
+            raw=raw,
+            query=query,
+            width=width,
+            height=height,
+        )
+
+    def predict_batch(
+        self,
+        *,
+        images: list[Image.Image],
+        queries: list[str],
+    ) -> list[ExternalPrediction]:
+        if len(images) != len(queries):
+            raise ValueError("images and queries must have the same length")
+        if not images:
+            return []
+        pairs = [
+            (self._model_image(image), self._ground_single_prompt(query))
+            for image, query in zip(images, queries)
+        ]
+        raws = self.worker.predict_batch(pairs)
+        if len(raws) != len(queries):
+            raise RuntimeError("LocateAnything batch output count mismatch")
+        predictions = [
+            self._prediction_from_raw(
+                raw=raw,
+                query=query,
+                width=image.width,
+                height=image.height,
+            )
+            for raw, query, image in zip(raws, queries, images)
+        ]
+        missing = [
+            index
+            for index, prediction in enumerate(predictions)
+            if any(
+                candidate.source == "locateanything_fallback_center"
+                for candidate in prediction.candidates
+            )
+        ]
+        if not missing:
+            return predictions
+
+        # Keep the fast batch path for normal cases, but retry missed rows with
+        # the single-sample cascade before using the deterministic fallback.
+        for index in missing:
+            retried = self.predict(image=images[index], query=queries[index])
+            predictions[index] = retried
+        return predictions
 
 
 def main() -> int:
