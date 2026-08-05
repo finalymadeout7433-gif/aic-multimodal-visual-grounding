@@ -30,6 +30,7 @@ from aic_baseline.external_eval import (  # noqa: E402
 
 BOX_PATTERN = re.compile(r"<box><(\d+)><(\d+)><(\d+)><(\d+)></box>")
 REF_PATTERN = re.compile(r"<ref>(.*?)</ref>\s*<box>")
+FALLBACK_CENTER_PIXEL_BOX = [0.25, 0.25, 0.75, 0.75]
 
 
 def parse_args() -> argparse.Namespace:
@@ -133,7 +134,14 @@ class LocateAnythingPredictor:
 
     def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
         width, height = image.size
-        raw = self.worker.ground_multi(self._model_image(image), query)
+        model_image = self._model_image(image)
+        raw = self.worker.ground_single(model_image, query)
+        answer_probe = raw.get("answer") if isinstance(raw, dict) else str(raw)
+        if not BOX_PATTERN.search(str(answer_probe or "")):
+            raw = self.worker.ground_gui(model_image, query, output_type="box")
+            answer_probe = raw.get("answer") if isinstance(raw, dict) else str(raw)
+        if not BOX_PATTERN.search(str(answer_probe or "")):
+            raw = self.worker.ground_multi(model_image, query)
         answer = raw.get("answer") if isinstance(raw, dict) else str(raw)
         if answer is None:
             answer = ""
@@ -153,6 +161,20 @@ class LocateAnythingPredictor:
                     label=self._label_for_box(answer, match.start(), query),
                     score=float(index * -1),
                     source="locateanything",
+                )
+            )
+        if not candidates:
+            candidates.append(
+                ModelCandidate(
+                    pixel_bbox=[
+                        FALLBACK_CENTER_PIXEL_BOX[0] * width,
+                        FALLBACK_CENTER_PIXEL_BOX[1] * height,
+                        FALLBACK_CENTER_PIXEL_BOX[2] * width,
+                        FALLBACK_CENTER_PIXEL_BOX[3] * height,
+                    ],
+                    label=query,
+                    score=-999.0,
+                    source="locateanything_fallback_center",
                 )
             )
         return ExternalPrediction(raw_output=raw, candidates=candidates)
