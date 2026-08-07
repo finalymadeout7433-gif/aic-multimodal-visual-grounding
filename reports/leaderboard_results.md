@@ -1,5 +1,41 @@
 # 排行榜结果
 
+## 当前最高分：Qwen3-VL-8B-Instruct zero-shot
+
+| 字段 | 结果 |
+|---|---:|
+| 模型 | `Qwen/Qwen3-VL-8B-Instruct` |
+| 输入 | Visible RGB + 原始英文 Query |
+| 训练 | 无；零样本推理 |
+| 正式 Query | 9,555 |
+| invalid bbox | 0 |
+| no candidate | 0 |
+| 平台 ACC@0.5 | **0.7582** |
+| 平台截图排名 | 14 |
+| 平台记录时间 | 2026-08-07 19:28:19 |
+| 本地提交 ZIP | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip` |
+| ZIP SHA-256 | `D3D1757BA6052C117B13DC8175B21475DF22B084D2465570B5E998C1D78E1188` |
+
+该分数来自用户提供的平台结果截图。完整审计、云端路径、下一轮模型路线见
+[Qwen3-VL-8B 平台结果报告](qwen3_vl_8b_platform_result_2026_08_07.md)。
+
+## 当前完整排名记录
+
+| 项目内排序 | 模型 / 策略 | 平台 ACC@0.5 | 平台时间 |
+|---:|---|---:|---|
+| 1 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** | 2026-08-07 19:28:19 |
+| 2 | LocateAnything-3B zero-shot | 0.7210 | 2026-08-05 21:31:36 |
+| 3 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 |
+| 4 | Florence-2 RGB-only v0.2.0 | 0.4980 | 2026-07-29 18:52:09 |
+| 5 | S04 GroundingDINO Conservative LTR | 0.4957 | 2026-08-01 13:12:35 |
+| 6 | LLMDet-Swin-T zero-shot | 0.4942 | 2026-08-02 14:44:19 |
+| 7 | GroundingDINO-Tiny Top-1 S02 | 0.4938 | 2026-08-01 01:09:49 |
+| 8 | APE-Ti zero-shot | 0.4424 | 2026-08-02 13:29:14 |
+| 9 | GroundingDINO + Spatial LTR S03 | 0.3190 | 2026-07-31 23:52:51 |
+
+本地所有可提交 ZIP 的集中索引见
+[AIC 平台提交包索引](submission_package_index.md)。
+
 ## Florence-2 RGB-only v0.2.0
 
 | 字段 | 结果 |

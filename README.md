@@ -1,5 +1,22 @@
 # 2026 AIC 多模态视觉定位 Baseline
 
+## 先从这里看
+
+如果是在 GitHub 页面浏览本仓库，优先打开：
+
+- [AIC 项目导航](AIC_PROJECT_INDEX.md)
+- [排行榜结果](reports/leaderboard_results.md)
+- [提交包索引](reports/submission_package_index.md)
+- [Qwen3-VL-8B 平台结果与下一轮模型路线](reports/qwen3_vl_8b_platform_result_2026_08_07.md)
+
+当前最高分：`Qwen3-VL-8B-Instruct zero-shot = 0.7582`。
+
+对应本地提交包：
+
+```text
+D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip
+```
+
 第一版可完整运行的 RGB-only 基线：
 
 ```text
