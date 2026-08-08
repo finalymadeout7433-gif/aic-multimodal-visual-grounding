@@ -4,7 +4,9 @@ Date: 2026-08-05
 
 ## Executive conclusion
 
-This round confirms that `LocateAnything-3B` is the current strongest confirmed AIC zero-training model in this project.
+This round confirmed that `LocateAnything-3B` was the strongest AIC zero-training model at the time.
+
+Status after the later Qwen3-VL run: `LocateAnything-3B` is now the confirmed second-highest zero-training model in this project. It was superseded by `Qwen3-VL-8B-Instruct` with platform ACC@0.5 `0.7582` on 2026-08-07.
 
 Confirmed platform score from the user-provided leaderboard screenshot:
 
@@ -113,30 +115,32 @@ To avoid repeated upload cost next time, prefer one of these options:
 | Save environment snapshot | Useful for dependencies and weights, but snapshot can be large |
 | Keep only GitHub + local upload archive | Cheapest if cloud storage is limited, but requires re-upload |
 
-## Current model ranking
+## Model ranking after Qwen3-VL update
 
 Confirmed AIC platform results so far:
 
 | Rank in project | Model / strategy | ACC@0.5 |
 |---:|---|---:|
-| 1 | LocateAnything-3B zero-shot | **0.7210** |
-| 2 | MM-Grounding-DINO-T zero-shot | 0.5011 |
-| 3 | Florence-2-large-ft RGB-only | 0.4980 |
-| 4 | Conservative GDINO ranker S04 | 0.4957 |
-| 5 | LLMDet-Swin-T zero-shot | 0.4942 |
-| 6 | GroundingDINO-Tiny Top-1 | 0.4938 |
-| 7 | APE-Ti zero-shot | 0.4424 |
-| 8 | RefCOCO-trained LightGBM ranker S03 | 0.3190 |
+| 1 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** |
+| 2 | LocateAnything-3B zero-shot | **0.7210** |
+| 3 | MM-Grounding-DINO-T zero-shot | 0.5011 |
+| 4 | Florence-2-large-ft RGB-only | 0.4980 |
+| 5 | Conservative GDINO ranker S04 | 0.4957 |
+| 6 | LLMDet-Swin-T zero-shot | 0.4942 |
+| 7 | GroundingDINO-Tiny Top-1 | 0.4938 |
+| 8 | APE-Ti zero-shot | 0.4424 |
+| 9 | RefCOCO-trained LightGBM ranker S03 | 0.3190 |
 
 ## Decision
 
-`LocateAnything-3B` should become the new confirmed control baseline.
+`LocateAnything-3B` remains an important confirmed baseline, but the current control baseline is now `Qwen3-VL-8B-Instruct`.
 
 Next platform experiments should be single-variable changes relative to this baseline, for example:
 
-1. Qwen3-VL-8B full run as an independent model, if cloud compute is available again;
-2. LocateAnything prompt / mode ablation;
-3. LocateAnything higher input scale or slow/hybrid decoding if supported;
-4. controlled ensemble only after each single model score is known.
+1. Qwen3-VL-8B-Thinking as a single-variable Qwen-series test;
+2. EGM-Qwen3-VL-8B if the weights and license are confirmed usable;
+3. LocateAnything prompt / mode ablation;
+4. LocateAnything higher input scale or slow/hybrid decoding if supported;
+5. controlled ensemble only after each single model score is known.
 
 Do not continue the old RefCOCO LightGBM ranker submission route as a main path.

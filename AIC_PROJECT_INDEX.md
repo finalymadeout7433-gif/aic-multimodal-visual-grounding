@@ -9,12 +9,14 @@
 | 当前分数排行榜、哪一轮最高 | [`reports/leaderboard_results.md`](reports/leaderboard_results.md) |
 | 本地提交包 ZIP 在哪里 | [`reports/submission_package_index.md`](reports/submission_package_index.md) |
 | 当前最高分 Qwen3-VL-8B 的详细记录 | [`reports/qwen3_vl_8b_platform_result_2026_08_07.md`](reports/qwen3_vl_8b_platform_result_2026_08_07.md) |
+| 上一轮 0.7210 是哪个模型 | [`reports/locateanything_3b_platform_result_2026_08_05.md`](reports/locateanything_3b_platform_result_2026_08_05.md) |
 
 ## 当前最高分
 
 | 模型 | 平台 ACC@0.5 | 本地提交包 |
 |---|---:|---|
 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip` |
+| LocateAnything-3B zero-shot | 0.7210 | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_LocateAnything_3B_zero_shot_v1.zip` |
 
 ## 代码目录怎么读
 

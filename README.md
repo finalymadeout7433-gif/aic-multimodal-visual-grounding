@@ -17,6 +17,15 @@
 D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip
 ```
 
+上一轮 `0.7210` 的模型是 `nvidia/LocateAnything-3B`，它是当前第二高分的零训练模型。对应报告与提交包：
+
+- [LocateAnything-3B 平台结果报告](reports/locateanything_3b_platform_result_2026_08_05.md)
+- 本地提交包：
+
+```text
+D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_LocateAnything_3B_zero_shot_v1.zip
+```
+
 第一版可完整运行的 RGB-only 基线：
 
 ```text
