@@ -25,16 +25,27 @@
 |---:|---|---:|---|
 | 1 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** | 2026-08-07 19:28:19 |
 | 2 | LocateAnything-3B zero-shot | 0.7210 | 2026-08-05 21:31:36 |
-| 3 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 |
-| 4 | Florence-2 RGB-only v0.2.0 | 0.4980 | 2026-07-29 18:52:09 |
-| 5 | S04 GroundingDINO Conservative LTR | 0.4957 | 2026-08-01 13:12:35 |
-| 6 | LLMDet-Swin-T zero-shot | 0.4942 | 2026-08-02 14:44:19 |
-| 7 | GroundingDINO-Tiny Top-1 S02 | 0.4938 | 2026-08-01 01:09:49 |
-| 8 | APE-Ti zero-shot | 0.4424 | 2026-08-02 13:29:14 |
-| 9 | GroundingDINO + Spatial LTR S03 | 0.3190 | 2026-07-31 23:52:51 |
+| 3 | Qwen3-VL-8B-Thinking cascade | 0.7194 | 2026-08-09 平台截图 |
+| 4 | EGM-Qwen3-VL-8B zero-shot | 0.5333 | 2026-08-09 平台截图 |
+| 5 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 |
+| 6 | Florence-2 RGB-only v0.2.0 | 0.4980 | 2026-07-29 18:52:09 |
+| 7 | S04 GroundingDINO Conservative LTR | 0.4957 | 2026-08-01 13:12:35 |
+| 8 | LLMDet-Swin-T zero-shot | 0.4942 | 2026-08-02 14:44:19 |
+| 9 | GroundingDINO-Tiny Top-1 S02 | 0.4938 | 2026-08-01 01:09:49 |
+| 10 | APE-Ti zero-shot | 0.4424 | 2026-08-02 13:29:14 |
+| 11 | GroundingDINO + Spatial LTR S03 | 0.3190 | 2026-07-31 23:52:51 |
 
 本地所有可提交 ZIP 的集中索引见
 [AIC 平台提交包索引](submission_package_index.md)。
+
+## Qwen3-VL-8B-Thinking 与 EGM-Qwen3-VL-8B
+
+| 模型 / 策略 | 平台 ACC@0.5 | 结论 |
+|---|---:|---|
+| Qwen3-VL-8B-Thinking cascade | 0.7194 | 低于 Instruct 0.7582，推理成本更高；不作为当前主线 |
+| EGM-Qwen3-VL-8B zero-shot | 0.5333 | 提交格式正确，但在 AIC 上出现大框/区域化偏差；放弃作为主线 |
+
+EGM 复盘见 [EGM-Qwen3-VL-8B 平台复盘](egm_qwen3_vl_8b_platform_postmortem_2026_08_09.md)。当前下一轮更强模型候选改为 `Qwen3-VL-30B-A3B-Instruct`，不继续直接全量押注 EGM。
 
 ## Florence-2 RGB-only v0.2.0
 

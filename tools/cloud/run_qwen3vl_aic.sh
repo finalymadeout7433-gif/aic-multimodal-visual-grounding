@@ -20,6 +20,9 @@ python "$PROJECT_ROOT/tools/cloud/run_qwen3vl_aic.py" \
   --min-pixels "${QWEN_MIN_PIXELS:-262144}" \
   --max-pixels "${QWEN_MAX_PIXELS:-1310720}" \
   --max-new-tokens "${QWEN_MAX_NEW_TOKENS:-96}" \
+  --retry-max-new-tokens "${QWEN_RETRY_MAX_NEW_TOKENS:-0}" \
+  --batch-size "${QWEN_BATCH_SIZE:-1}" \
+  --enable-thinking "${QWEN_ENABLE_THINKING:-auto}" \
   --resume \
   ${LIMIT_ARG} \
   ${FINALIZE_ARG:-}

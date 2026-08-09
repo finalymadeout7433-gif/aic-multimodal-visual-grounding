@@ -10,6 +10,8 @@
 | 本地提交包 ZIP 在哪里 | [`reports/submission_package_index.md`](reports/submission_package_index.md) |
 | 当前最高分 Qwen3-VL-8B 的详细记录 | [`reports/qwen3_vl_8b_platform_result_2026_08_07.md`](reports/qwen3_vl_8b_platform_result_2026_08_07.md) |
 | 上一轮 0.7210 是哪个模型 | [`reports/locateanything_3b_platform_result_2026_08_05.md`](reports/locateanything_3b_platform_result_2026_08_05.md) |
+| EGM 为什么只有 0.5333 | [`reports/egm_qwen3_vl_8b_platform_postmortem_2026_08_09.md`](reports/egm_qwen3_vl_8b_platform_postmortem_2026_08_09.md) |
+| 下一轮为什么测 Qwen3-VL-30B-A3B | [`reports/qwen3_vl_30b_a3b_next_model_decision_2026_08_09.md`](reports/qwen3_vl_30b_a3b_next_model_decision_2026_08_09.md) |
 
 ## 当前最高分
 
@@ -46,12 +48,13 @@
 | 三模型 APE/MM-GDINO/LLMDet 对照 | `reports/aic_three_model_zero_shot_full_report.md` |
 | GroundingDINO Ranker 失败复盘 | `reports/gdino_spatial_ltr_v1_platform_postmortem.md` |
 | 数据集审计结论 | `reports/dataset_audit_summary.md` |
+| Qwen3-VL-30B-A3B 下一轮决策 | `reports/qwen3_vl_30b_a3b_next_model_decision_2026_08_09.md` |
 
 ## 后续路线
 
 当前主线不再是传统检测器或 RefCOCO LightGBM Ranker，而是：
 
-1. Qwen3-VL-8B-Thinking；
-2. EGM-Qwen3-VL-8B；
-3. Qwen3-VL-30B-A3B / 32B 量化 smoke；
-4. 确认单模型收益后，再考虑多模型融合或多模态 IR/Depth。
+1. 以 Qwen3-VL-8B-Instruct `0.7582` 作为当前主控制基线；
+2. 放弃 EGM-Qwen3-VL-8B 作为主线，只保留小规模 prompt/token 诊断；
+3. 下一轮优先测试 Qwen3-VL-30B-A3B-Instruct；
+4. 确认更强单模型收益后，再考虑多模型融合或多模态 IR/Depth。

@@ -23,6 +23,8 @@
 | M03 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 | 642,700 | `302572F8E0922ACE40475F1D349BD9E5477022B16432C9E8B4254A1F4C5F599E` | `D:\12525\Documents\pytorch\baseline_v0\outputs\aic_zero_shot_full_v1\platform_upload_ready\AIC_MM_Grounding_DINO_T_zero_shot_v1.zip` |
 | M04 | LocateAnything-3B zero-shot | 0.7210 | 2026-08-05 21:31:36 | 324,710 | `4763A3627FFE9E11898E9205C967F7FAB41482AD7464C6B07B87ABF55859C45C` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_LocateAnything_3B_zero_shot_v1.zip` |
 | M05 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** | 2026-08-07 19:28:19 | 336,716 | `D3D1757BA6052C117B13DC8175B21475DF22B084D2465570B5E998C1D78E1188` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip` |
+| M06 | Qwen3-VL-8B-Thinking cascade | 0.7194 | 2026-08-09 平台截图 | 319,578 | `472A8EEC2032242F7839A8D8CB3D3FAF22D087167EF087DAF50A630A722D2056` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\qwen3_vl_8b_thinking_cascade_20260808\AIC_Qwen3_VL_8B_Thinking_tok256_retry1024_InstructFallback_20260808.zip` |
+| M07 | EGM-Qwen3-VL-8B zero-shot | 0.5333 | 2026-08-09 平台截图 | 313,215 | `33F3284CA1C38E1B1A364CDBB86B83D467F02C59E76FC1CC82B4346BC8E788CD` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\egm_qwen3_vl_8b_zero_shot_5090_20260809\AIC_EGM_Qwen3_VL_8B_zero_shot_5090_v1_20260809.zip` |
 
 ## 找文件的最短路径
 

@@ -42,8 +42,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dtype", choices=("auto", "bfloat16", "float16"), default="auto")
     parser.add_argument("--attn", choices=("auto", "flash_attention_2", "sdpa"), default="auto")
     parser.add_argument("--max-new-tokens", type=int, default=96)
+    parser.add_argument(
+        "--retry-max-new-tokens",
+        type=int,
+        default=0,
+        help=(
+            "If greater than max-new-tokens, retry only parser-failed single-sample "
+            "generations with this larger token budget before using fallback."
+        ),
+    )
     parser.add_argument("--min-pixels", type=int, default=262144)
     parser.add_argument("--max-pixels", type=int, default=1310720)
+    parser.add_argument("--batch-size", type=int, default=1)
+    parser.add_argument(
+        "--enable-thinking",
+        choices=("auto", "true", "false"),
+        default="auto",
+        help=(
+            "Qwen3 chat-template thinking switch. Use false to force the "
+            "Thinking checkpoints into non-thinking mode for structured bbox output."
+        ),
+    )
     parser.add_argument("--limit", type=int)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--finalize", action="store_true")
@@ -133,6 +152,8 @@ class Qwen3VLPredictor:
         min_pixels: int,
         max_pixels: int,
         max_new_tokens: int,
+        retry_max_new_tokens: int,
+        enable_thinking: str,
     ) -> None:
         import torch
         from transformers import AutoModelForImageTextToText, AutoProcessor
@@ -145,6 +166,8 @@ class Qwen3VLPredictor:
             kwargs["attn_implementation"] = attn
         self.model_name = model_path
         self.processor = AutoProcessor.from_pretrained(model_path)
+        if hasattr(self.processor, "tokenizer"):
+            self.processor.tokenizer.padding_side = "left"
         if hasattr(self.processor, "image_processor"):
             self.processor.image_processor.size = {
                 "shortest_edge": min_pixels,
@@ -152,6 +175,8 @@ class Qwen3VLPredictor:
             }
         self.model = AutoModelForImageTextToText.from_pretrained(model_path, **kwargs)
         self.max_new_tokens = max_new_tokens
+        self.retry_max_new_tokens = retry_max_new_tokens
+        self.enable_thinking = enable_thinking
 
     @staticmethod
     def _prompt(query: str) -> str:
@@ -166,8 +191,8 @@ class Qwen3VLPredictor:
             + query
         )
 
-    def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
-        messages = [
+    def _messages(self, *, image: Image.Image, query: str) -> list[dict[str, Any]]:
+        return [
             {
                 "role": "user",
                 "content": [
@@ -176,26 +201,44 @@ class Qwen3VLPredictor:
                 ],
             }
         ]
-        inputs = self.processor.apply_chat_template(
-            messages,
-            tokenize=True,
-            add_generation_prompt=True,
-            return_dict=True,
+
+    def _prepare_batch_inputs(self, messages_batch: list[list[dict[str, Any]]]) -> Any:
+        from qwen_vl_utils import process_vision_info
+
+        texts = []
+        for messages in messages_batch:
+            chat_template_kwargs: dict[str, Any] = {
+                "tokenize": False,
+                "add_generation_prompt": True,
+            }
+            if self.enable_thinking != "auto":
+                chat_template_kwargs["enable_thinking"] = self.enable_thinking == "true"
+            text = self.processor.apply_chat_template(
+                messages,
+                **chat_template_kwargs,
+            )
+            texts.append(text)
+        image_inputs, video_inputs = process_vision_info(
+            [message for messages in messages_batch for message in messages]
+        )
+        return self.processor(
+            text=texts,
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
             return_tensors="pt",
         )
-        inputs = inputs.to(self.model.device)
-        generated = self.model.generate(**inputs, max_new_tokens=self.max_new_tokens)
-        trimmed = [
-            output_ids[len(input_ids) :]
-            for input_ids, output_ids in zip(inputs.input_ids, generated)
-        ]
-        text = self.processor.batch_decode(
-            trimmed,
-            skip_special_tokens=True,
-            clean_up_tokenization_spaces=False,
-        )[0]
+
+    def _prediction_from_text(
+        self,
+        *,
+        text: str,
+        image: Image.Image,
+        query: str,
+        success_source: str = "qwen3vl",
+    ) -> ExternalPrediction:
         width, height = image.size
-        source = "qwen3vl"
+        source = success_source
         score = 1.0
         try:
             bbox = _sanitize_pixel_bbox(
@@ -224,6 +267,97 @@ class Qwen3VLPredictor:
             ],
         )
 
+    def _generate_single_text(
+        self,
+        *,
+        messages: list[dict[str, Any]],
+        max_new_tokens: int,
+    ) -> str:
+        if self.enable_thinking != "auto":
+            inputs = self._prepare_batch_inputs([messages])
+        else:
+            inputs = self.processor.apply_chat_template(
+                messages,
+                tokenize=True,
+                add_generation_prompt=True,
+                return_dict=True,
+                return_tensors="pt",
+            )
+        inputs = inputs.to(self.model.device)
+        generated = self.model.generate(
+            **inputs,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
+        )
+        trimmed = [
+            output_ids[len(input_ids) :]
+            for input_ids, output_ids in zip(inputs.input_ids, generated)
+        ]
+        return self.processor.batch_decode(
+            trimmed,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
+        )[0]
+
+    def predict(self, *, image: Image.Image, query: str) -> ExternalPrediction:
+        messages = self._messages(image=image, query=query)
+        text = self._generate_single_text(
+            messages=messages,
+            max_new_tokens=self.max_new_tokens,
+        )
+        prediction = self._prediction_from_text(text=text, image=image, query=query)
+        if (
+            prediction.candidates[0].source == "qwen3vl_fallback_center"
+            and self.retry_max_new_tokens > self.max_new_tokens
+        ):
+            retry_text = self._generate_single_text(
+                messages=messages,
+                max_new_tokens=self.retry_max_new_tokens,
+            )
+            retry_prediction = self._prediction_from_text(
+                text=retry_text,
+                image=image,
+                query=query,
+                success_source="qwen3vl_retry",
+            )
+            if retry_prediction.candidates[0].source != "qwen3vl_fallback_center":
+                retry_prediction.raw_output["initial_text"] = text
+                retry_prediction.raw_output["retry_max_new_tokens"] = (
+                    self.retry_max_new_tokens
+                )
+                return retry_prediction
+        return prediction
+
+    def predict_batch(
+        self,
+        *,
+        images: list[Image.Image],
+        queries: list[str],
+    ) -> list[ExternalPrediction]:
+        messages_batch = [
+            self._messages(image=image, query=query)
+            for image, query in zip(images, queries)
+        ]
+        inputs = self._prepare_batch_inputs(messages_batch).to(self.model.device)
+        generated = self.model.generate(
+            **inputs,
+            max_new_tokens=self.max_new_tokens,
+            do_sample=False,
+        )
+        trimmed = [
+            output_ids[len(input_ids) :]
+            for input_ids, output_ids in zip(inputs.input_ids, generated)
+        ]
+        texts = self.processor.batch_decode(
+            trimmed,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
+        )
+        return [
+            self._prediction_from_text(text=text, image=image, query=query)
+            for text, image, query in zip(texts, images, queries)
+        ]
+
 
 def main() -> int:
     args = parse_args()
@@ -244,6 +378,9 @@ def main() -> int:
         "min_pixels": args.min_pixels,
         "max_pixels": args.max_pixels,
         "max_new_tokens": args.max_new_tokens,
+        "retry_max_new_tokens": args.retry_max_new_tokens,
+        "enable_thinking": args.enable_thinking,
+        "batch_size": args.batch_size,
         "record_limit": args.limit,
     }
     load_started = time.perf_counter()
@@ -254,6 +391,8 @@ def main() -> int:
         min_pixels=args.min_pixels,
         max_pixels=args.max_pixels,
         max_new_tokens=args.max_new_tokens,
+        retry_max_new_tokens=args.retry_max_new_tokens,
+        enable_thinking=args.enable_thinking,
     )
     load_seconds = time.perf_counter() - load_started
     if torch.cuda.is_available():
@@ -287,7 +426,7 @@ def main() -> int:
         run_fingerprint=fingerprint,
         resume=args.resume,
         limit=args.limit,
-        batch_size=1,
+        batch_size=args.batch_size,
         progress_callback=progress,
     )
     environment = {
