@@ -1,42 +1,54 @@
 # 排行榜结果
 
-## 当前最高分：Qwen3-VL-8B-Instruct zero-shot
+## 当前最高分：Qwen3-VL-30B-A3B-Instruct-FP8 + 8B fallback
 
 | 字段 | 结果 |
 |---|---:|
-| 模型 | `Qwen/Qwen3-VL-8B-Instruct` |
+| 主模型 | `Qwen/Qwen3-VL-30B-A3B-Instruct-FP8` |
+| fallback | `Qwen3-VL-8B-Instruct` 0.7582 历史最佳提交 |
 | 输入 | Visible RGB + 原始英文 Query |
 | 训练 | 无；零样本推理 |
 | 正式 Query | 9,555 |
 | invalid bbox | 0 |
-| no candidate | 0 |
-| 平台 ACC@0.5 | **0.7582** |
-| 平台截图排名 | 14 |
-| 平台记录时间 | 2026-08-07 19:28:19 |
-| 本地提交 ZIP | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip` |
-| ZIP SHA-256 | `D3D1757BA6052C117B13DC8175B21475DF22B084D2465570B5E998C1D78E1188` |
+| 主模型 fallback | 13 |
+| 平台 ACC@0.5 | **0.7757** |
+| 平台截图排名 | 10 |
+| 平台记录时间 | 2026-08-09 22:14:57 |
+| 本地提交 ZIP | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_30B_A3B_FP8_8BInstructFallback_20260809.zip` |
+| ZIP SHA-256 | `f2486b013d740b5c89cc782e95b7eb4c11c8cbd1b8899879e9146b415ea8f9d8` |
 
 该分数来自用户提供的平台结果截图。完整审计、云端路径、下一轮模型路线见
-[Qwen3-VL-8B 平台结果报告](qwen3_vl_8b_platform_result_2026_08_07.md)。
+[Qwen3-VL-30B-A3B-FP8 平台结果报告](qwen3_vl_30b_a3b_fp8_platform_result_2026_08_09.md)。
 
 ## 当前完整排名记录
 
 | 项目内排序 | 模型 / 策略 | 平台 ACC@0.5 | 平台时间 |
 |---:|---|---:|---|
-| 1 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** | 2026-08-07 19:28:19 |
-| 2 | LocateAnything-3B zero-shot | 0.7210 | 2026-08-05 21:31:36 |
-| 3 | Qwen3-VL-8B-Thinking cascade | 0.7194 | 2026-08-09 平台截图 |
-| 4 | EGM-Qwen3-VL-8B zero-shot | 0.5333 | 2026-08-09 平台截图 |
-| 5 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 |
-| 6 | Florence-2 RGB-only v0.2.0 | 0.4980 | 2026-07-29 18:52:09 |
-| 7 | S04 GroundingDINO Conservative LTR | 0.4957 | 2026-08-01 13:12:35 |
-| 8 | LLMDet-Swin-T zero-shot | 0.4942 | 2026-08-02 14:44:19 |
-| 9 | GroundingDINO-Tiny Top-1 S02 | 0.4938 | 2026-08-01 01:09:49 |
-| 10 | APE-Ti zero-shot | 0.4424 | 2026-08-02 13:29:14 |
-| 11 | GroundingDINO + Spatial LTR S03 | 0.3190 | 2026-07-31 23:52:51 |
+| 1 | Qwen3-VL-30B-A3B-FP8 + 8B fallback | **0.7757** | 2026-08-09 22:14:57 |
+| 2 | Qwen3-VL-8B-Instruct zero-shot | 0.7582 | 2026-08-07 19:28:19 |
+| 3 | LocateAnything-3B zero-shot | 0.7210 | 2026-08-05 21:31:36 |
+| 4 | Qwen3-VL-8B-Thinking cascade | 0.7194 | 2026-08-09 平台截图 |
+| 5 | EGM-Qwen3-VL-8B zero-shot | 0.5333 | 2026-08-09 平台截图 |
+| 6 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 |
+| 7 | Florence-2 RGB-only v0.2.0 | 0.4980 | 2026-07-29 18:52:09 |
+| 8 | S04 GroundingDINO Conservative LTR | 0.4957 | 2026-08-01 13:12:35 |
+| 9 | LLMDet-Swin-T zero-shot | 0.4942 | 2026-08-02 14:44:19 |
+| 10 | GroundingDINO-Tiny Top-1 S02 | 0.4938 | 2026-08-01 01:09:49 |
+| 11 | APE-Ti zero-shot | 0.4424 | 2026-08-02 13:29:14 |
+| 12 | GroundingDINO + Spatial LTR S03 | 0.3190 | 2026-07-31 23:52:51 |
 
 本地所有可提交 ZIP 的集中索引见
 [AIC 平台提交包索引](submission_package_index.md)。
+
+## Qwen3-VL-30B-A3B-FP8 与 8B fallback
+
+| 模型 / 策略 | 平台 ACC@0.5 | 结论 |
+|---|---:|---|
+| Qwen3-VL-30B-A3B-FP8 + 8B fallback | **0.7757** | 当前最高分；证明 Qwen3-VL Instruct 系列扩大规模对 AIC 有实际收益 |
+| Qwen3-VL-8B-Instruct zero-shot | 0.7582 | 旧最高分；仍是低成本对照和可靠 fallback 来源 |
+
+本轮 30B 主模型完成 9,555 条推理，其中 13 条出现无效/拒答类 fallback，最终用 8B 历史最佳提交中对应 Query 的 bbox 替换。该策略只处理格式失败，不使用 AIC 标签训练或人工修框。环境坑与下次复跑配置见
+[30B 云端环境记录](cloud_qwen30b_fp8_environment_notes_2026_08_10.md)。
 
 ## Qwen3-VL-8B-Thinking 与 EGM-Qwen3-VL-8B
 

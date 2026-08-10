@@ -8,7 +8,7 @@
 
 | 模型 / 策略 | 平台 ACC@0.5 | 本地 ZIP |
 |---|---:|---|
-| Qwen3-VL-8B-Instruct zero-shot | **0.7582** | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip` |
+| Qwen3-VL-30B-A3B-FP8 + 8B fallback | **0.7757** | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_30B_A3B_FP8_8BInstructFallback_20260809.zip` |
 
 ## 全部已知提交包
 
@@ -25,6 +25,7 @@
 | M05 | Qwen3-VL-8B-Instruct zero-shot | **0.7582** | 2026-08-07 19:28:19 | 336,716 | `D3D1757BA6052C117B13DC8175B21475DF22B084D2465570B5E998C1D78E1188` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip` |
 | M06 | Qwen3-VL-8B-Thinking cascade | 0.7194 | 2026-08-09 平台截图 | 319,578 | `472A8EEC2032242F7839A8D8CB3D3FAF22D087167EF087DAF50A630A722D2056` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\qwen3_vl_8b_thinking_cascade_20260808\AIC_Qwen3_VL_8B_Thinking_tok256_retry1024_InstructFallback_20260808.zip` |
 | M07 | EGM-Qwen3-VL-8B zero-shot | 0.5333 | 2026-08-09 平台截图 | 313,215 | `33F3284CA1C38E1B1A364CDBB86B83D467F02C59E76FC1CC82B4346BC8E788CD` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\egm_qwen3_vl_8b_zero_shot_5090_20260809\AIC_EGM_Qwen3_VL_8B_zero_shot_5090_v1_20260809.zip` |
+| M08 | Qwen3-VL-30B-A3B-FP8 + 8B fallback | **0.7757** | 2026-08-09 22:14:57 | 319,576 | `f2486b013d740b5c89cc782e95b7eb4c11c8cbd1b8899879e9146b415ea8f9d8` | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_30B_A3B_FP8_8BInstructFallback_20260809.zip` |
 
 ## 找文件的最短路径
 
