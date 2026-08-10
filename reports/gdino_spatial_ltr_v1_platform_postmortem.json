@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "evidence": "user_provided_platform_screenshots_and_local_candidate_audit",
+  "platform": {
+    "florence_s01_acc_at_05": 0.498,
+    "gdino_s02_acc_at_05": 0.4938,
+    "ranker_s03_acc_at_05": 0.319,
+    "s02_minus_s01_pp": -0.42,
+    "s03_minus_s02_pp": -17.48,
+    "s03_minus_s01_pp": -17.9,
+    "approximate_s03_net_correct_loss_vs_s02": 1670,
+    "score_precision_note": "Approximate query counts use four-decimal platform scores."
+  },
+  "aic_selection_audit": {
+    "queries": 9555,
+    "switches": 4770,
+    "switch_rate": 0.49921507064364207,
+    "invalid_ranker_indices": 0,
+    "control_candidate_mapping_mismatches": 0,
+    "ranker_candidate_mapping_mismatches": 0,
+    "selected_score_delta_mean": -0.2211550212100117,
+    "selected_score_delta_median": -0.1957724541425705,
+    "selected_to_top1_area_ratio_median": 5.667959914163711,
+    "selected_to_top1_area_ratio_p90": 89.74812050161545,
+    "selected_larger_than_top1_rate": 0.8895178197064989,
+    "selected_at_least_2x_top1_rate": 0.7280922431865828,
+    "same_label_switch_rate": 0.42955974842767297,
+    "selected_to_top1_iou_median": 0.01956141141493373,
+    "selected_to_top1_iou_below_0_1_rate": 0.7018867924528301,
+    "selected_to_top1_iou_below_0_5_rate": 0.9134171907756813,
+    "relative_query_switches": 1014,
+    "target_to_reference_flips": 238,
+    "target_to_reference_flip_rate": 0.23471400394477318
+  },
+  "external_holdout_selection_audit": {
+    "queries": 10000,
+    "switches": 3518,
+    "switch_rate": 0.3518,
+    "selected_score_delta_mean": -0.15222048058030008,
+    "selected_score_delta_median": -0.1243877112865448,
+    "selected_to_top1_area_ratio_median": 0.728565487343544,
+    "selected_larger_than_top1_rate": 0.33484934621944284,
+    "selected_at_least_2x_top1_rate": 0.13786242183058556,
+    "same_label_switch_rate": 0.6421262080727687,
+    "relative_query_switches": 726,
+    "target_to_reference_flips": 7,
+    "target_to_reference_flip_rate": 0.009641873278236915
+  },
+  "distribution_shift": {
+    "aic_top1_candidate_area_median": 0.02567003147689522,
+    "holdout_top1_candidate_area_median": 0.20573683926818148,
+    "aic_all_candidate_area_median": 0.016649141217702997,
+    "holdout_all_candidate_area_median": 0.14091909485588858,
+    "aic_query_words_mean": 10.438304552590267,
+    "holdout_query_words_mean": 5.113,
+    "aic_query_words_median": 9,
+    "holdout_query_words_median": 4,
+    "train_ordinal_rate": 0.0696,
+    "holdout_ordinal_rate": 0.061,
+    "aic_ordinal_rate": 0.22093144950287704
+  },
+  "root_causes": [
+    "absolute area shortcut reversed under AIC small-object distribution",
+    "target candidates were frequently replaced by larger reference objects",
+    "ordinal training quota could not match the AIC query distribution",
+    "guard_margin zero allowed aggressive low-confidence cross-label switches"
+  ],
+  "decision": {
+    "ranker_status": "rejected_for_aic_submission",
+    "recommended_reference": "Florence S01 or GroundingDINO S02",
+    "next_experiment": "conservative same-target gated reranking from the frozen S02 candidate cache"
+  }
+}

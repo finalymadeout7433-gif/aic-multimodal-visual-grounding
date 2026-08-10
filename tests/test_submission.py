@@ -52,3 +52,36 @@ def test_submission_rejects_missing_or_extra_prediction_ids(tmp_path: Path) -> N
             output_json=tmp_path / "submission.json",
             output_zip=tmp_path / "submission.zip",
         )
+
+
+def test_submission_zip_is_byte_deterministic_across_json_mtime_changes(
+    tmp_path: Path,
+) -> None:
+    original = {"q1": {"query": "target"}}
+    predictions = {"q1": [0.1, 0.2, 0.5, 0.8]}
+
+    first_json = tmp_path / "first" / "predictions_submission.json"
+    first_zip = tmp_path / "first" / "predictions_submission.zip"
+    second_json = tmp_path / "second" / "predictions_submission.json"
+    second_zip = tmp_path / "second" / "predictions_submission.zip"
+    build_submission(
+        original_records=original,
+        predictions=predictions,
+        output_json=first_json,
+        output_zip=first_zip,
+    )
+    build_submission(
+        original_records=original,
+        predictions=predictions,
+        output_json=second_json,
+        output_zip=second_zip,
+    )
+
+    # The source file timestamps differ, but the archive must remain canonical.
+    first_json.touch()
+    second_json.touch()
+    assert first_zip.read_bytes() == second_zip.read_bytes()
+    with zipfile.ZipFile(first_zip) as archive:
+        info = archive.getinfo("predictions_submission.json")
+        assert info.date_time == (1980, 1, 1, 0, 0, 0)
+        assert b"\r\n" not in archive.read(info)

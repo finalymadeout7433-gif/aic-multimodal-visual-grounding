@@ -1,0 +1,47 @@
+diff --git a/ape/modeling/ape_deta/deformable_transformer_vl.py b/ape/modeling/ape_deta/deformable_transformer_vl.py
+index 185ce24..df823f7 100644
+--- a/ape/modeling/ape_deta/deformable_transformer_vl.py
++++ b/ape/modeling/ape_deta/deformable_transformer_vl.py
+@@ -457,7 +457,10 @@ class DeformableDetrTransformerVL(nn.Module):
+             spatial_shapes, dtype=torch.long, device=feat_flatten.device
+         )
+         level_start_index = torch.cat(
+-            (spatial_shapes.new_zeros((1,)), spatial_shapes.prod(1).cumsum(0)[:-1])
++            (
++                spatial_shapes.new_zeros((1,)),
++                (spatial_shapes[:, 0] * spatial_shapes[:, 1]).cumsum(0)[:-1],
++            )
+         )
+         valid_ratios = torch.stack([self.get_valid_ratio(m) for m in multi_level_masks], 1)
+         valid_ratios = valid_ratios.to(feat_flatten.dtype)
+
+diff --git a/ape/modeling/ape_deta/deformable_detr_segm_vl.py b/ape/modeling/ape_deta/deformable_detr_segm_vl.py
+index 6517bf2..cb55127 100644
+--- a/ape/modeling/ape_deta/deformable_detr_segm_vl.py
++++ b/ape/modeling/ape_deta/deformable_detr_segm_vl.py
+@@ -566,10 +566,22 @@ class DeformableDETRSegmVL(DeformableDETR):
+ 
+             start_time = time.perf_counter()
+ 
+-            iter_func = retry_if_cuda_oom(F.interpolate)
+-            mask_pred = iter_func(
+-                mask_pred, size=images.tensor.size()[2:], mode="bilinear", align_corners=False
++            # Detection-only inference does not consume masks. Avoid expanding all
++            # query masks to the full image, which otherwise wastes several GiB
++            # and can OOM before bbox post-processing on an 8 GiB GPU.
++            needs_upsampled_masks = (
++                (self.instance_on and self.test_mask_on)
++                or self.semantic_on
++                or self.panoptic_on
+             )
++            if needs_upsampled_masks:
++                iter_func = retry_if_cuda_oom(F.interpolate)
++                mask_pred = iter_func(
++                    mask_pred,
++                    size=images.tensor.size()[2:],
++                    mode="bilinear",
++                    align_corners=False,
++                )
+ 
+             merged_results = [{} for _ in range(box_cls.size(0))]
+             if self.instance_on and not (

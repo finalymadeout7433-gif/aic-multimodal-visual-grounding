@@ -1,0 +1,552 @@
+{
+  "experiment": "gdino_spatial_ltr_v1",
+  "status": "complete",
+  "random_seed": 20260731,
+  "florence_platform_acc_at_05": 0.498,
+  "subsets": {
+    "pilot": {
+      "name": "rank_train_pilot",
+      "records": 20000,
+      "unique_images": 13137,
+      "maximum_queries_per_image": 2,
+      "image_cap_attempted": 4,
+      "image_cap_relaxation_used": false,
+      "requested_category_counts": {
+        "action": 1456,
+        "attribute": 1950,
+        "depth": 3598,
+        "ordinal": 4419,
+        "other": 2096,
+        "plural_group": 418,
+        "spatial": 6063
+      },
+      "category_quota_deviation": {
+        "action": 137,
+        "attribute": 358,
+        "depth": 107,
+        "ordinal": -1726,
+        "other": 784,
+        "plural_group": 18,
+        "spatial": 322
+      },
+      "category_counts": {
+        "action": 1593,
+        "attribute": 2308,
+        "depth": 3705,
+        "ordinal": 2693,
+        "other": 2880,
+        "plural_group": 436,
+        "spatial": 6385
+      },
+      "dataset_counts": {
+        "refcoco": 9577,
+        "refcoco_plus": 5071,
+        "refcocog": 5352
+      },
+      "query_ids_sha256": "A8F70C293AE3A5C6E9C169AF478542B059BD72925E0F2C7666F3F2775662DD09",
+      "file_sha256": "F63C73FD14C4DF6CC15FAAB6BCFFE928518F2461236EE2F40BBD703C99334410"
+    },
+    "full": {
+      "name": "rank_train_full",
+      "records": 50000,
+      "unique_images": 20224,
+      "maximum_queries_per_image": 3,
+      "image_cap_attempted": 4,
+      "image_cap_relaxation_used": false,
+      "requested_category_counts": {
+        "action": 3640,
+        "attribute": 4875,
+        "depth": 8996,
+        "ordinal": 11046,
+        "other": 5241,
+        "plural_group": 1045,
+        "spatial": 15157
+      },
+      "category_quota_deviation": {
+        "action": 750,
+        "attribute": 1777,
+        "depth": 252,
+        "ordinal": -7566,
+        "other": 3878,
+        "plural_group": 115,
+        "spatial": 794
+      },
+      "category_counts": {
+        "action": 4390,
+        "attribute": 6652,
+        "depth": 9248,
+        "ordinal": 3480,
+        "other": 9119,
+        "plural_group": 1160,
+        "spatial": 15951
+      },
+      "dataset_counts": {
+        "refcoco": 22106,
+        "refcoco_plus": 12894,
+        "refcocog": 15000
+      },
+      "query_ids_sha256": "217EE4DA18426B3C90A1BE361A1139C6D7299834DB8192D8C37BCC92306AA783",
+      "file_sha256": "BBC86574DD5FFF71098893269283B02169DC4FF46D1A4B065EFE43C674CCD310"
+    },
+    "validation": {
+      "name": "rank_validation",
+      "records": 10000,
+      "unique_images": 2567,
+      "maximum_queries_per_image": 5,
+      "image_cap_attempted": 5,
+      "image_cap_relaxation_used": true,
+      "requested_category_counts": {
+        "action": 728,
+        "attribute": 975,
+        "depth": 1799,
+        "ordinal": 2209,
+        "other": 1048,
+        "plural_group": 209,
+        "spatial": 3032
+      },
+      "category_quota_deviation": {
+        "action": 235,
+        "attribute": 589,
+        "depth": -48,
+        "ordinal": -1795,
+        "other": 1137,
+        "plural_group": 45,
+        "spatial": -163
+      },
+      "category_counts": {
+        "action": 963,
+        "attribute": 1564,
+        "depth": 1751,
+        "ordinal": 414,
+        "other": 2185,
+        "plural_group": 254,
+        "spatial": 2869
+      },
+      "dataset_counts": {
+        "refcoco": 3862,
+        "refcoco_plus": 2748,
+        "refcocog": 3390
+      },
+      "query_ids_sha256": "BD5478E3CCAF984CF1D69FED50CF2613AAB8F47601656E20C8342050D1B3E81F",
+      "file_sha256": "9702ED7D695FF46D177F768C2FA974047E42D48B137B4871A22BA7C265740154"
+    },
+    "source_manifests": {
+      "train_sha256": "52CF6043A07AC6502431DD24A149CE06F86A36AEA541F732ACBFB789E2C92E25",
+      "validation_sha256": "C141D13839C057AED276BAE9A927C5B77567EDA3362D0D806154808BE394B388",
+      "holdout_sha256": "B9BA85403491BD679D8DA0C826D7D4A2BDBD22F8C53C1B37692C1848F33BC610"
+    },
+    "holdout": {
+      "name": "rank_holdout",
+      "records": 10000,
+      "unique_images": 3346,
+      "maximum_queries_per_image": 4,
+      "image_cap_attempted": 5,
+      "image_cap_relaxation_used": false,
+      "requested_category_counts": {
+        "action": 728,
+        "attribute": 975,
+        "depth": 1799,
+        "ordinal": 2209,
+        "other": 1048,
+        "plural_group": 209,
+        "spatial": 3032
+      },
+      "category_quota_deviation": {
+        "action": 100,
+        "attribute": 342,
+        "depth": 57,
+        "ordinal": -1599,
+        "other": 850,
+        "plural_group": 17,
+        "spatial": 233
+      },
+      "category_counts": {
+        "action": 828,
+        "attribute": 1317,
+        "depth": 1856,
+        "ordinal": 610,
+        "other": 1898,
+        "plural_group": 226,
+        "spatial": 3265
+      },
+      "dataset_counts": {
+        "refcoco": 4446,
+        "refcoco_plus": 2704,
+        "refcocog": 2850
+      },
+      "query_ids_sha256": "B9CEC6A6D52430E5759806989397C370DB1EEC490C719369EDABEDBC6F7F13E8",
+      "file_sha256": "37C322CA3189EAF4D42A95A3AC8A11AA85810F81B52E8CD6C0E52B7455DC10B6"
+    }
+  },
+  "smoke": {
+    "requested_records": 100,
+    "records": 100,
+    "records_reused": 0,
+    "records_processed": 100,
+    "no_candidate_records": 0,
+    "solvable_at_05_records": 90,
+    "candidate_oracle_acc_at_05": 0.9,
+    "wall_seconds_this_run": 39.73708399999305,
+    "cuda_peak_allocated_bytes": 2126779392
+  },
+  "pilot": {
+    "grid_index": 3,
+    "params": {
+      "objective": "lambdarank",
+      "metric": "ndcg",
+      "eval_at": [
+        1,
+        3,
+        5
+      ],
+      "label_gain": [
+        0,
+        1,
+        4,
+        5
+      ],
+      "learning_rate": 0.03,
+      "n_estimators": 1200,
+      "lambdarank_truncation_level": 5,
+      "subsample": 0.8,
+      "subsample_freq": 1,
+      "colsample_bytree": 0.8,
+      "reg_lambda": 1.0,
+      "early_stopping_rounds": 100,
+      "deterministic": true,
+      "force_col_wise": true,
+      "n_jobs": 4,
+      "verbosity": -1,
+      "num_leaves": 63,
+      "min_child_samples": 100
+    },
+    "guard_margin": 0.0,
+    "best_iteration": 215,
+    "dev_overall": {
+      "queries": 4000,
+      "baseline_acc_at_05": 0.473,
+      "selected_acc_at_05": 0.604,
+      "oracle_acc_at_05": 0.87825,
+      "baseline_mean_iou": 0.48087424236794324,
+      "selected_mean_iou": 0.5840458746284639,
+      "oracle_mean_iou": 0.8304854940145687,
+      "switch_rate": 0.399,
+      "rescued": 766,
+      "harmed": 242
+    }
+  },
+  "model": {
+    "model_path": "outputs/gdino_spatial_ltr_v1/models/gdino_spatial_ltr_v1.txt",
+    "training_groups": 42260,
+    "training_candidate_rows": 210446,
+    "n_estimators": 215,
+    "guard_margin": 0.0
+  },
+  "validation_promotion": {
+    "model_sha256": "41F979CC8044B329B9DB98266AF191B28C6DF6F9400AF3BDB8CD281473F336A1",
+    "guard_margin": 0.0,
+    "validation_overall_gain": 0.11130000000000007,
+    "spatial_ordinal_gain": 0.15504112092598238,
+    "worst_dataset_gain": 0.08915574963609896,
+    "candidate_health": {
+      "candidate_count": 45269,
+      "legal_candidate_count": 45269,
+      "candidate_bbox_legal_rate": 1.0,
+      "unexpected_error_count": 0,
+      "silent_fallback_count": 0
+    },
+    "freeze_identity": {
+      "ranker_model_sha256": "41F979CC8044B329B9DB98266AF191B28C6DF6F9400AF3BDB8CD281473F336A1",
+      "geometry_model_sha256": "1C0A4154A642F527688FB6FBA8EE83D46CFA8CF88EB16BFBF81E7FA9D121AF3E",
+      "frozen_model_sha256": "D8B048A8825D3ABAAF766CA41832E2937AF2C0090745DC671E96520F8F61E68C",
+      "feature_schema_sha256": "BB30E3E304D457512302BA32642DBCD67B88A58940F5640A88812B17975524A1",
+      "ranker_config_sha256": "D9C5175DCE074D7631AAF5F2AD1BD30E45D6CA6CDA45560F9560126DF90214CE",
+      "grounding_dino_config_sha256": "C79B9EECE2ABCB69A9A79E014FE029635B95A4D6B39B8B62069B4376C870187B",
+      "subset_config_sha256": "755212E35DE53D6A96FFA2FD36CB696037E377F670F82C7586AD897F4AC068E8",
+      "promotion_config_sha256": "83625A742E4E2F18FC260E7CD83E223DCC5BEA851BB0E44FECA78866DC8895A9",
+      "ranker_semantics_code_sha256": "F449817990930ED33C98953795E758277C9779C9CFABAD4A7FFFD636EE1B25AB",
+      "validation_cache_fingerprint_sha256": "DA666EF504B2147014153193983338CBC90A2113FC7829C89D35655EE35B4850",
+      "identity_sha256": "47AF06DA5B6F58D59553308C5843A37B6A72CB4650CB3F63E8DE1BCC81FCFE9A"
+    },
+    "freeze_identity_sha256": "47AF06DA5B6F58D59553308C5843A37B6A72CB4650CB3F63E8DE1BCC81FCFE9A",
+    "validation_promotion_pass": true
+  },
+  "validation": {
+    "queries": 10000,
+    "baseline_acc_at_05": 0.5365,
+    "selected_acc_at_05": 0.6478,
+    "oracle_acc_at_05": 0.8936,
+    "baseline_mean_iou": 0.5357124624014316,
+    "selected_mean_iou": 0.6218602270271244,
+    "oracle_mean_iou": 0.8387008858666523,
+    "switch_rate": 0.3392,
+    "rescued": 1653,
+    "harmed": 540
+  },
+  "validation_cache": {
+    "requested_records": 10000,
+    "records": 10000,
+    "records_reused": 0,
+    "records_processed": 10000,
+    "no_candidate_records": 6,
+    "solvable_at_05_records": 8936,
+    "candidate_oracle_acc_at_05": 0.8936,
+    "wall_seconds_this_run": 3682.527599599998,
+    "cuda_peak_allocated_bytes": 2142882304
+  },
+  "holdout": {
+    "queries": 10000,
+    "baseline_acc_at_05": 0.5211,
+    "selected_acc_at_05": 0.6333,
+    "oracle_acc_at_05": 0.8936,
+    "baseline_mean_iou": 0.5224003429795095,
+    "selected_mean_iou": 0.6095887570758584,
+    "oracle_mean_iou": 0.8382981314616336,
+    "switch_rate": 0.3518,
+    "rescued": 1740,
+    "harmed": 618
+  },
+  "holdout_cache": {
+    "requested_records": 10000,
+    "records": 10000,
+    "records_reused": 0,
+    "records_processed": 10000,
+    "no_candidate_records": 11,
+    "solvable_at_05_records": 8936,
+    "candidate_oracle_acc_at_05": 0.8936,
+    "wall_seconds_this_run": 3765.964202099989,
+    "cuda_peak_allocated_bytes": 2141372416
+  },
+  "holdout_gain": 0.11219999999999997,
+  "local_promotion": {
+    "pass": true,
+    "complete": true,
+    "thresholds": {
+      "overall_gain": 0.02,
+      "spatial_ordinal_gain": 0.04,
+      "maximum_dataset_drop": 0.01,
+      "legal_bbox_rate": 1.0
+    },
+    "checks": {
+      "overall_gain": 0.11219999999999997,
+      "overall_pass": true,
+      "spatial_ordinal_gain": 0.1623225806451613,
+      "spatial_ordinal_pass": true,
+      "worst_dataset_gain": 0.07951183431952669,
+      "dataset_pass": true,
+      "legal_bbox_rate": 1.0,
+      "legal_bbox_pass": true,
+      "silent_fallback_count": 0,
+      "numerical_error_count": 0,
+      "pipeline_safety_pass": true
+    }
+  },
+  "holdout_provenance": {
+    "schema_version": 1,
+    "freeze_identity_sha256": "47AF06DA5B6F58D59553308C5843A37B6A72CB4650CB3F63E8DE1BCC81FCFE9A",
+    "ranker_model_sha256": "41F979CC8044B329B9DB98266AF191B28C6DF6F9400AF3BDB8CD281473F336A1",
+    "holdout_cache_fingerprint_sha256": "F9881935B430F1F92F71A44F2C4D6C16F40634C2407E07ABF5B8A12664A3D7F2",
+    "holdout_evaluation_sha256": "EA6C97209C180C6FF301DA5209D36FF8C6CDD081E163E2BF395D4DEE61411F1C",
+    "legacy_manifest_backfill": true
+  },
+  "aic_cache": {
+    "requested_records": 9555,
+    "records": 9555,
+    "records_reused": 0,
+    "records_processed": 9555,
+    "no_candidate_records": 0,
+    "solvable_at_05_records": 0,
+    "candidate_oracle_acc_at_05": 0.0,
+    "wall_seconds_this_run": 4197.986193599994,
+    "cuda_peak_allocated_bytes": 2115012608
+  },
+  "submissions": {
+    "selection_summary": {
+      "records": 9555,
+      "fallback_count": 0,
+      "fallback_rate": 0.0,
+      "switch_count": 4770,
+      "switch_rate": 0.49921507064364207,
+      "legal_bbox_rate": 1.0,
+      "guard_margin": 0.0
+    },
+    "submission_audit": {
+      "control": {
+        "json_path": "outputs/gdino_spatial_ltr_v1/submissions/S02_gdino_top1_control/predictions_submission.json",
+        "json_sha256": "B813042F3E70E559DF645FEB8839BBCBC09E79A4CDE54A2581C11804433CEB38",
+        "zip_path": "outputs/gdino_spatial_ltr_v1/submissions/S02_gdino_top1_control/predictions_submission.zip",
+        "zip_sha256": "99F06B050E5478212A26D233F365CCA29B7FF3EA44CF73E171F0EEE4F1B706E5",
+        "zip_entry_count": 1,
+        "zip_bad_member": null
+      },
+      "ranker": {
+        "json_path": "outputs/gdino_spatial_ltr_v1/submissions/S03_gdino_spatial_ltr_v1/predictions_submission.json",
+        "json_sha256": "04FE5648028D5E42B83DAC0C1E5BA057C5D00164A3A7EFBE3A20DD8A9B377D85",
+        "zip_path": "outputs/gdino_spatial_ltr_v1/submissions/S03_gdino_spatial_ltr_v1/predictions_submission.zip",
+        "zip_sha256": "23819AE2728B7502BE53384C2F5F906EB7F7ED45ACF95EF74E92D10FB4A702CF",
+        "zip_entry_count": 1,
+        "zip_bad_member": null
+      }
+    },
+    "selection_debug_path": "outputs/gdino_spatial_ltr_v1/submissions/selection_debug.jsonl"
+  },
+  "artifact_manifest": {
+    "configuration/config_fingerprint.json": {
+      "bytes": 346,
+      "sha256": "F1B5283C10D9DDC8F50828D89EDEBB7B6673B007F5F962294462732F0721D44D"
+    },
+    "environment.json": {
+      "bytes": 367,
+      "sha256": "E97842A24C321362041DA93BF784C4098A90344ECA5C4CBAF018A7F1E6458232"
+    },
+    "verification_summary.json": {
+      "bytes": 543,
+      "sha256": "9DB7D87C53EA5DD3FC6D70D69EED7CCEAFE4ED02BB251C1BDC8D260FEAB8D44A"
+    },
+    "models/gdino_spatial_ltr_v1.txt": {
+      "bytes": 1521796,
+      "sha256": "41F979CC8044B329B9DB98266AF191B28C6DF6F9400AF3BDB8CD281473F336A1"
+    },
+    "models/gdino_score_geometry_ablation.txt": {
+      "bytes": 1515809,
+      "sha256": "1C0A4154A642F527688FB6FBA8EE83D46CFA8CF88EB16BFBF81E7FA9D121AF3E"
+    },
+    "models/frozen_model.json": {
+      "bytes": 2729225,
+      "sha256": "D8B048A8825D3ABAAF766CA41832E2937AF2C0090745DC671E96520F8F61E68C"
+    },
+    "evaluations/validation/evaluation.json": {
+      "bytes": 31775456,
+      "sha256": "6EB391DE5137EB97DFA75452F12D21D59DD8F16AA38EEC8DC41CDF5784FEA13E"
+    },
+    "evaluations/validation/frozen_decision.json": {
+      "bytes": 1725,
+      "sha256": "1A968B1FCDAF63CE80F79A235F7501E5F6F286BBF050BAB340D0E296F25ED580"
+    },
+    "evaluations/holdout/evaluation.json": {
+      "bytes": 31687197,
+      "sha256": "EA6C97209C180C6FF301DA5209D36FF8C6CDD081E163E2BF395D4DEE61411F1C"
+    },
+    "evaluations/holdout/evaluation_provenance.json": {
+      "bytes": 463,
+      "sha256": "5FE35D039D018B8A9C60496A8DBFC973CD29D0BD1FCE15733552B424D1EB7492"
+    },
+    "submissions/S02_gdino_top1_control/predictions_submission.json": {
+      "bytes": 3454585,
+      "sha256": "B813042F3E70E559DF645FEB8839BBCBC09E79A4CDE54A2581C11804433CEB38"
+    },
+    "submissions/S02_gdino_top1_control/predictions_submission.zip": {
+      "bytes": 642640,
+      "sha256": "99F06B050E5478212A26D233F365CCA29B7FF3EA44CF73E171F0EEE4F1B706E5"
+    },
+    "submissions/S03_gdino_spatial_ltr_v1/predictions_submission.json": {
+      "bytes": 3456981,
+      "sha256": "04FE5648028D5E42B83DAC0C1E5BA057C5D00164A3A7EFBE3A20DD8A9B377D85"
+    },
+    "submissions/S03_gdino_spatial_ltr_v1/predictions_submission.zip": {
+      "bytes": 642507,
+      "sha256": "23819AE2728B7502BE53384C2F5F906EB7F7ED45ACF95EF74E92D10FB4A702CF"
+    }
+  },
+  "configuration_fingerprint": {
+    "schema_version": 1,
+    "full_config_sha256": "54C4DFC90DB59E248BDA72F5D5A4FAA8B7B07DFA7524D72017785BE9749095FB",
+    "reproducible_config_sha256": "581B6610940FADFBEFCD527BBA524E0C7324A06C019075CC5147B0D4462FE1EE",
+    "included_public_sections": [
+      "seed",
+      "grounding_dino",
+      "subsets",
+      "ranker",
+      "promotion"
+    ]
+  },
+  "phase_status": {
+    "subsets": {
+      "status": "completed",
+      "wall_seconds": 14.03440390000469
+    },
+    "cache-train": {
+      "status": "completed",
+      "wall_seconds": 7219.333435599998
+    },
+    "train-pilot": {
+      "status": "completed",
+      "wall_seconds": 19.198332500003744
+    },
+    "cache-train-full": {
+      "status": "completed",
+      "wall_seconds": 11056.549553699995
+    },
+    "train-final": {
+      "status": "completed",
+      "wall_seconds": 46.52212790001067
+    },
+    "cache-validation": {
+      "status": "completed",
+      "wall_seconds": 3685.7914652000036
+    },
+    "evaluate-validation": {
+      "status": "completed",
+      "wall_seconds": 6.6344489000039175
+    },
+    "cache-holdout": {
+      "status": "completed",
+      "wall_seconds": 3785.3450960000046
+    },
+    "evaluate-holdout": {
+      "status": "completed",
+      "wall_seconds": 0.26130389999889303
+    },
+    "cache-aic": {
+      "status": "completed",
+      "wall_seconds": 4201.247811599998
+    },
+    "submissions": {
+      "status": "completed",
+      "wall_seconds": 11.36282989999745
+    },
+    "summary": {
+      "status": "completed",
+      "wall_seconds": 0.08610670000780374
+    }
+  },
+  "verification": {
+    "schema_version": 1,
+    "pytest": {
+      "status": "passed",
+      "passed": 80,
+      "seconds": 15.95
+    },
+    "compileall": {
+      "status": "passed"
+    },
+    "powershell_parser": {
+      "status": "passed"
+    },
+    "submission_audit": {
+      "status": "passed",
+      "records": 9555,
+      "invalid_bbox": 0,
+      "non_bbox_mismatch": 0,
+      "bbox_differences": 4770,
+      "zip_entry_count_each": 1,
+      "zip_payload_equal": true
+    },
+    "code_review": {
+      "status": "passed",
+      "standards": "passed_after_fixes",
+      "spec": "passed_after_fixes"
+    }
+  },
+  "environment": {
+    "python": "3.11.15 | packaged by Anaconda, Inc. | (main, Mar 11 2026, 17:12:15) [MSC v.1942 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "torch": "2.5.1+cu121",
+    "transformers": "4.57.6",
+    "lightgbm": "4.6.0",
+    "cuda_available": true,
+    "cuda_device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "cuda_total_memory_bytes": 8585216000
+  },
+  "run_summary_path": "outputs/gdino_spatial_ltr_v1/run_summary.json"
+}
