@@ -4,6 +4,7 @@
 
 如果是在 GitHub 页面浏览本仓库，优先打开：
 
+- [RGB–TIR 红外模块持续更新技术报告](reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md)
 - [AIC 项目导航](AIC_PROJECT_INDEX.md)
 - [排行榜结果](reports/leaderboard_results.md)
 - [提交包索引](reports/submission_package_index.md)

@@ -6,6 +6,7 @@
 
 | 你要找什么 | 打开哪个文件 |
 |---|---|
+| 红外模块从算法设计到当前优化的完整技术报告 | [`reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md`](reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md) |
 | 当前分数排行榜、哪一轮最高 | [`reports/leaderboard_results.md`](reports/leaderboard_results.md) |
 | 本地提交包 ZIP 在哪里 | [`reports/submission_package_index.md`](reports/submission_package_index.md) |
 | 当前最高分 Qwen3-VL-30B-A3B-FP8 的详细记录 | [`reports/qwen3_vl_30b_a3b_fp8_platform_result_2026_08_09.md`](reports/qwen3_vl_30b_a3b_fp8_platform_result_2026_08_09.md) |
