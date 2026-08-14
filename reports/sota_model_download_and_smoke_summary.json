@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-08-01",
+  "status": "completed_with_ape_runtime_blocked",
+  "environment": {
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "vram_mib": 8188,
+    "torch": "2.5.1+cu121",
+    "transformers": "4.57.6",
+    "huggingface_hub": "0.36.2"
+  },
+  "assets": {
+    "ape_ti": {
+      "code_commit": "8c4920e2014d4818ec3ecafb7b526d896a659d1c",
+      "huggingface_revision": "6ee15cf54c3930528ac49be165b45d5bcb1f4fd9",
+      "license": "Apache-2.0",
+      "weight_bytes": 2316022287,
+      "weight_sha256": "B5D793E960515A6D1AA4B8A55B61DA990B0B4184B510D3D7AD3BB37526FB8007",
+      "checkpoint_parameters": 776701310,
+      "checkpoint_language_related_tensors": 414,
+      "runtime_status": "blocked_native_runtime"
+    },
+    "mm_grounding_dino_t": {
+      "code_commit": "cfd5d3a985b0249de009b67d04f37263e11cdf3d",
+      "huggingface_revision": "80b3081e63ff7c265a9b404296d848f0f0aa0006",
+      "license": "Apache-2.0",
+      "original_weight_bytes": 960771250,
+      "original_weight_sha256": "4EA751CECB6741437290A1352A1561AF365084672FFEA1B2115070B07BCCE134",
+      "transformers_weight_bytes": 692015412,
+      "transformers_weight_sha256": "2D9BDFD0247F167A00E00FFFA1DEC1EE5D5861FDFB4E27FD8CC2279AF6820688",
+      "runtime_status": "passed"
+    },
+    "llmdet_swin_t": {
+      "code_commit": "53366243fba758ad3d7a042c0c1457dee91a02b2",
+      "original_huggingface_revision": "51aea9d9598ea8136ddcc2842c58480a33d09e9c",
+      "transformers_huggingface_revision": "6719e6ec2b2f7f0f3fed035fdca7b1856a1107c9",
+      "license": "Apache-2.0",
+      "original_weight_bytes": 2262911558,
+      "original_weight_sha256": "9F0EB4DE246C9C8DF7194A921A335F8C3F24C95D3C0DCB1AFD22CF3DB4CAD042",
+      "official_pytorch_bin_sha256": "3D7157A358780627EB824BACDBE3B8A13671E4D5FADD860841144EAB77420476",
+      "derived_safe_serialization_sha256": "1D9E7CB0C53DB1A8EA6D26D23248247F489FBD6F64302821CCA64FB557653A3B",
+      "runtime_status": "passed_with_pytorch_attention_fallback"
+    }
+  },
+  "official_sample": {
+    "query_id": "000108_001",
+    "mm_grounding_dino_t": {
+      "top1_iou": 0.40822071,
+      "best_iou": 0.72413584,
+      "best_rank": 13
+    },
+    "llmdet_swin_t": {
+      "top1_iou": 0.0,
+      "best_iou": 0.61964095,
+      "best_rank": 3
+    }
+  },
+  "probe_60": {
+    "kind": "external_labeled_smoke_probe_not_aic",
+    "records": 60,
+    "unique_images": 60,
+    "mm_grounding_dino_t": {
+      "top1_acc_at_05": 0.5333333333333333,
+      "top10_oracle_acc_at_05": 0.95,
+      "oracle_acc_at_05": 0.95,
+      "latency_ms_mean": 394.2818216671488
+    },
+    "llmdet_swin_t": {
+      "top1_acc_at_05": 0.45,
+      "top10_oracle_acc_at_05": 0.9333333333333333,
+      "oracle_acc_at_05": 0.95,
+      "latency_ms_mean": 395.7377733337732
+    },
+    "candidate_union_oracle_acc_at_05": 0.95,
+    "selected_bbox_agreement_at_05": 0.8333333333333334
+  },
+  "decision": {
+    "first_runnable_base": "MM-Grounding-DINO-T",
+    "ape_ti": "defer inference until an official Linux or WSL2 native build environment is authorized",
+    "llmdet_swin_t": "retain as a semantic comparison, but do not prioritize over MM-Grounding-DINO-T on current evidence"
+  }
+}

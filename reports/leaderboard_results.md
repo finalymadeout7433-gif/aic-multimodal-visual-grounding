@@ -1,5 +1,64 @@
 # 排行榜结果
 
+## 当前最高分：Qwen3-VL-30B-A3B-Instruct-FP8 + 8B fallback
+
+| 字段 | 结果 |
+|---|---:|
+| 主模型 | `Qwen/Qwen3-VL-30B-A3B-Instruct-FP8` |
+| fallback | `Qwen3-VL-8B-Instruct` 0.7582 历史最佳提交 |
+| 输入 | Visible RGB + 原始英文 Query |
+| 训练 | 无；零样本推理 |
+| 正式 Query | 9,555 |
+| invalid bbox | 0 |
+| 主模型 fallback | 13 |
+| 平台 ACC@0.5 | **0.7757** |
+| 平台截图排名 | 10 |
+| 平台记录时间 | 2026-08-09 22:14:57 |
+| 本地提交 ZIP | `D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_30B_A3B_FP8_8BInstructFallback_20260809.zip` |
+| ZIP SHA-256 | `f2486b013d740b5c89cc782e95b7eb4c11c8cbd1b8899879e9146b415ea8f9d8` |
+
+该分数来自用户提供的平台结果截图。完整审计、云端路径、下一轮模型路线见
+[Qwen3-VL-30B-A3B-FP8 平台结果报告](qwen3_vl_30b_a3b_fp8_platform_result_2026_08_09.md)。
+
+## 当前完整排名记录
+
+| 项目内排序 | 模型 / 策略 | 平台 ACC@0.5 | 平台时间 |
+|---:|---|---:|---|
+| 1 | Qwen3-VL-30B-A3B-FP8 + 8B fallback | **0.7757** | 2026-08-09 22:14:57 |
+| 2 | Qwen3-VL-8B-Instruct zero-shot | 0.7582 | 2026-08-07 19:28:19 |
+| 3 | LocateAnything-3B zero-shot | 0.7210 | 2026-08-05 21:31:36 |
+| 4 | Qwen3-VL-8B-Thinking cascade | 0.7194 | 2026-08-09 平台截图 |
+| 5 | EGM-Qwen3-VL-8B zero-shot | 0.5333 | 2026-08-09 平台截图 |
+| 6 | MM-Grounding-DINO-T zero-shot | 0.5011 | 2026-08-02 16:07:02 |
+| 7 | Florence-2 RGB-only v0.2.0 | 0.4980 | 2026-07-29 18:52:09 |
+| 8 | S04 GroundingDINO Conservative LTR | 0.4957 | 2026-08-01 13:12:35 |
+| 9 | LLMDet-Swin-T zero-shot | 0.4942 | 2026-08-02 14:44:19 |
+| 10 | GroundingDINO-Tiny Top-1 S02 | 0.4938 | 2026-08-01 01:09:49 |
+| 11 | APE-Ti zero-shot | 0.4424 | 2026-08-02 13:29:14 |
+| 12 | GroundingDINO + Spatial LTR S03 | 0.3190 | 2026-07-31 23:52:51 |
+
+本地所有可提交 ZIP 的集中索引见
+[AIC 平台提交包索引](submission_package_index.md)。
+
+## Qwen3-VL-30B-A3B-FP8 与 8B fallback
+
+| 模型 / 策略 | 平台 ACC@0.5 | 结论 |
+|---|---:|---|
+| Qwen3-VL-30B-A3B-FP8 + 8B fallback | **0.7757** | 当前最高分；证明 Qwen3-VL Instruct 系列扩大规模对 AIC 有实际收益 |
+| Qwen3-VL-8B-Instruct zero-shot | 0.7582 | 旧最高分；仍是低成本对照和可靠 fallback 来源 |
+
+本轮 30B 主模型完成 9,555 条推理，其中 13 条出现无效/拒答类 fallback，最终用 8B 历史最佳提交中对应 Query 的 bbox 替换。该策略只处理格式失败，不使用 AIC 标签训练或人工修框。环境坑与下次复跑配置见
+[30B 云端环境记录](cloud_qwen30b_fp8_environment_notes_2026_08_10.md)。
+
+## Qwen3-VL-8B-Thinking 与 EGM-Qwen3-VL-8B
+
+| 模型 / 策略 | 平台 ACC@0.5 | 结论 |
+|---|---:|---|
+| Qwen3-VL-8B-Thinking cascade | 0.7194 | 低于 Instruct 0.7582，推理成本更高；不作为当前主线 |
+| EGM-Qwen3-VL-8B zero-shot | 0.5333 | 提交格式正确，但在 AIC 上出现大框/区域化偏差；放弃作为主线 |
+
+EGM 复盘见 [EGM-Qwen3-VL-8B 平台复盘](egm_qwen3_vl_8b_platform_postmortem_2026_08_09.md)。当前下一轮更强模型候选改为 `Qwen3-VL-30B-A3B-Instruct`，不继续直接全量押注 EGM。
+
 ## Florence-2 RGB-only v0.2.0
 
 | 字段 | 结果 |
@@ -17,3 +76,65 @@
 
 该分数来自用户提供的平台结果截图。它是第一版可复现 RGB-only 工程基线，不代表
 后续多尺度、候选重排、Query 规范化或多模态方案的上限。
+
+## GroundingDINO 与 Spatial LTR 平台对照
+
+| 提交 | 输入与选择策略 | 平台 ACC@0.5 | 相对 Florence | 平台记录时间 |
+|---|---|---:|---:|---|
+| S02 | GroundingDINO-Tiny RGB + Query，原始 Top-1 | **0.4938** | -0.42 pp | 2026-08-01 01:09:49 |
+| S03 | 同一 Top-10 候选 + LightGBM Spatial LTR | **0.3190** | -17.90 pp | 2026-07-31 23:52:51 |
+
+两项分数均来自用户提供的平台结果截图。S02 与 Florence 基本持平；S03 相对 S02
+下降 17.48 个百分点。S03 在 9,555 条 Query 中改选了 4,770 条，按平台显示精度
+近似换算，改选造成约 1,670 条净正确预测损失。
+
+本地 RefCOCO 系列 holdout 上，Spatial LTR 曾将 ACC@0.5 从 0.5211 提高到
+0.6333，但该增益没有迁移到 AIC。逐候选审计表明，AIC 改选框的面积中位数是
+Top-1 的 5.67 倍，并出现明显的目标到参照物翻转。该结果现被定性为目标域负迁移，
+不能再把外部 holdout 增益表述为预期 AIC 增益。完整证据见
+[Spatial LTR 平台复盘](gdino_spatial_ltr_v1_platform_postmortem.md)。
+
+## S04 保守 Ranker
+
+| 提交 | 输入与选择策略 | 平台 ACC@0.5 | 相对 Florence | 平台记录时间 |
+|---|---|---:|---:|---|
+| S04 | S02 Top-1 + 同标签、分数降幅、面积倍率、参照物与 Depth 安全门 | **0.4957** | -0.23 pp | 2026-08-01 13:12:35 |
+
+S04 只在 9,555 条中切换 164 条，避免了 S03 的大规模负迁移，但仍未超过
+Florence-2。该结果证明保守门控能控制伤害，不证明现有 LightGBM Ranker 已成为
+更优平台基线。
+
+## 三个开源模型零训练全量对照
+
+三份提交均使用 Visible RGB + 原始英文 Query，处理 9,555 条 Query，采用模型
+原生最高分 Top-1；没有训练、候选重排、人工规则、IR/Depth 融合或 AIC 伪标签。
+
+| 模型 | 平台 ACC@0.5 | 相对 Florence | 相对 MM-GDINO-T | 平台记录时间 |
+|---|---:|---:|---:|---|
+| MM-Grounding-DINO-T | **0.5011** | **+0.31 pp** | — | 2026-08-02 16:07:02 |
+| LLMDet-Swin-T | **0.4942** | -0.38 pp | -0.69 pp | 2026-08-02 14:44:19 |
+| APE-Ti | **0.4424** | -5.56 pp | -5.87 pp | 2026-08-02 13:29:14 |
+
+分数均来自用户提供的平台截图。2026-08-02 最初曾因用户口头表述将 `0.4942`
+误归给 MM-Grounding-DINO-T；现已纠正为：
+
+- `0.4942` 属于 **LLMDet-Swin-T**；
+- `0.5011` 属于 **MM-Grounding-DINO-T**。
+
+三份推理输出、模型指纹和 ZIP 文件始终按各自模型目录独立保存，错误仅发生在
+平台截图对应模型的文字描述，不涉及提交包、预测文件或权重身份混淆。
+
+按平台显示的四位小数近似折算，MM-Grounding-DINO-T 比 Florence-2 多约 30 条
+正确预测，比 LLMDet-Swin-T 多约 66 条。由于平台分数存在显示舍入，这些数量只作
+量级解释，不作为逐样本真值。
+
+当前平台结论：
+
+1. **MM-Grounding-DINO-T（0.5011）成为当前最高分单模型控制基线。**
+2. LLMDet-Swin-T 未超过 Florence，也没有显示出比其 MM-GDINO 基座更好的 AIC
+   迁移；在扩大到 Swin-B/L 前应先证明独有收益。
+3. APE-Ti 的区域/stuff 能力没有转化为 AIC 总分，不再作为默认主线。
+4. 当前三个模型均为 RGB-only，结果不能用于否定 Infrared 或 Depth 的潜在价值。
+
+完整工程与模型资料见
+[三模型零训练全量报告](aic_three_model_zero_shot_full_report.md)。

@@ -1,0 +1,71 @@
+schema_version: 1
+experiment_name: gdino_conservative_s04
+artifact_name: S04_gdino_conservative_ltr_v1
+generated_date: "2026-08-01"
+
+paths:
+  validation_cache: null
+  holdout_cache: null
+  aic_candidate_cache: null
+  aic_cache_fingerprint: null
+  ranker_model: null
+  aic_queries: null
+  florence_fallback_predictions: null
+  s02_submission_json: null
+  output_root: outputs/gdino_conservative_s04
+  report_markdown: reports/gdino_conservative_s04_report.md
+  report_summary_json: reports/gdino_conservative_s04_summary.json
+
+expected_sha256:
+  validation_cache: null
+  holdout_cache: null
+  aic_candidate_cache: E87C5128A8E3005E501C3626D2366B5F9861F0632AA2B010AB076E21B779B225
+  aic_cache_fingerprint: null
+  ranker_model: 41F979CC8044B329B9DB98266AF191B28C6DF6F9400AF3BDB8CD281473F336A1
+  aic_queries: 2A08CD3A930D9749EDB86A8B420D8259DCE446116AD98D93338EDF8B3E1EF67C
+  florence_fallback_predictions: null
+  s02_submission_json: null
+
+expected_candidate_fingerprint:
+  model: IDEA-Research/grounding-dino-tiny
+  revision: a2bb814dd30d776dcf7e30523b00659f4f141c71
+  model_weights_sha256: 1A2412EF99BD74BCD3C2A246FA1E48581F8889A1300C9051974741314FC042F3
+  queries_sha256: 2A08CD3A930D9749EDB86A8B420D8259DCE446116AD98D93338EDF8B3E1EF67C
+  dtype: float32
+  box_threshold: 0.15
+  text_threshold: 0.15
+  max_candidates: 10
+  dedup_iou: 0.95
+  query_normalization: lowercase_with_terminal_period
+
+policy:
+  ranker_margin_min: 0.5
+  gdino_score_drop_max: 0.10
+  max_area_ratio: 1.5
+  require_same_canonical_label: true
+  reject_reference_dominant: true
+  reject_depth_queries: true
+  search_best_passing_candidate: true
+
+acceptance:
+  validation:
+    selected_acc_at_05_min: 0.5500
+    gain_pp_min: 1.3
+    rescue_harm_ratio_min: 5.0
+  holdout:
+    selected_acc_at_05_min: 0.5360
+    gain_pp_min: 1.4
+    rescue_harm_ratio_min: 4.5
+  aic:
+    records: 9555
+    bbox_differences_vs_s02: 164
+    switch_rate_max: 0.02
+    depth_switch_count: 0
+    cross_canonical_label_switch_count: 0
+    reference_dominant_switch_count: 0
+    max_switched_area_ratio: 1.5
+
+platform_baselines:
+  florence_s01_acc_at_05: 0.4980
+  gdino_s02_acc_at_05: 0.4938
+  unsafe_ranker_s03_acc_at_05: 0.3190
