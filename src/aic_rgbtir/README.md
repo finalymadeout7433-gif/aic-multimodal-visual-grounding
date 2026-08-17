@@ -54,7 +54,8 @@ Phase 1.7A+   absolute drift and failure attribution
 Phase 1.8     Base-relative retention (D1_L050)
 Phase 1.8R    persistent full train + sealed official-val + local audit
 Phase 1.9     Base-TIR geometry probe and D2_G025 full dual-dev gate
-next          per-layer checkpoint spectrum audit; no training yet
+Phase 1.9-A   four-checkpoint, dual-dev per-layer spectrum audit; no training
+next          define one layer-selective D3 candidate from audit evidence only
 ```
 
 The full chronology, metrics, failure analysis, and decision boundaries live in

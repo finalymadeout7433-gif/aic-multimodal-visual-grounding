@@ -68,6 +68,13 @@ from .phase18_full import (
     Phase18FullRunner,
 )
 from .phase18r_audit import Phase18RAuditConfig, Phase18RAuditor, Phase18RAuditResult
+from .phase19_d2_layer_audit import (
+    AUDIT_LAYERS,
+    D2LayerAudit,
+    LayerAuditFeatures,
+    pair_safe_shuffle_indices,
+    summarize_checkpoint_audits,
+)
 from .query_probe import QueryCandidate, QueryInterfaceSmoke, QuerySmokeResult
 from .processing import PairedRGBTBatch, PairedRGBTProcessor, SharedGeometryTransform
 
@@ -117,6 +124,11 @@ __all__ = [
     "Phase18RAuditConfig",
     "Phase18RAuditor",
     "Phase18RAuditResult",
+    "AUDIT_LAYERS",
+    "D2LayerAudit",
+    "LayerAuditFeatures",
+    "pair_safe_shuffle_indices",
+    "summarize_checkpoint_audits",
     "QueryCandidate",
     "QueryInterfaceSmoke",
     "QuerySmokeResult",

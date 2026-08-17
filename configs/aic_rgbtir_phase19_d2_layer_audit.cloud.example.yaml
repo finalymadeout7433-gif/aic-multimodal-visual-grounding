@@ -1,0 +1,46 @@
+extends: aic_rgbtir_phase19_d2_full.cloud.example.yaml
+
+scope:
+  layer_audit: true
+  full_training: false
+  sealed_dual_dev_selection: false
+  one_shot_official_val: false
+  forbid_query_training: true
+  forbid_fusion: true
+  forbid_depth: true
+  forbid_aic_test: true
+  forbid_fallback: true
+
+paths:
+  rgbt_root: "/home/featurize/data/RGBT_GroundBench/extracted"
+  manifest_root: "/home/featurize/aic_rgbtir_phase19_d2_layer_audit_bundle/assets/manifests"
+  teacher_bank: "/home/featurize/aic_rgbtir_phase19_d2_layer_audit_bundle/assets/teacher_bank/teacher_bank.pt"
+  checkpoints_dir: "/home/featurize/aic_rgbtir_phase19_d2_layer_audit_bundle/assets/checkpoints"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase19_d2_layer_audit_v1"
+  model_cache: "/home/featurize/full_model_cache"
+
+audit:
+  layers: ["8", "16", "24"]
+  checkpoint_steps: [5848, 11696, 17544, 23391]
+  minimum_rank_vs_base: 0.85
+
+runtime:
+  seed: 20260817
+  minimum_vram_gib: 23.0
+  minimum_host_ram_gib: 48.0
+  cache_checkpoint_pairs: 100
+
+expected:
+  semantic_records: 1024
+  semantic_pairs: 1024
+  semantic_sha256: "B9DFB8C4E47CAD542326BD25D5B2054EA7CADD64E6AA12BA72E2E7B84CD5D1D7"
+  multiquery_records: 1221
+  multiquery_pairs: 512
+  multiquery_sha256: "A54490B10BF9FC1BFB455C8052F883422D65038603E72CF650749E41D4DF363D"
+  teacher_bank_sha256: "B43CA908381DD42C4421FB3BF1A895DDD1C9396F40ED8B5BE2B51F2D2E966E08"
+  teacher_bank_fingerprint: "D8F01B557D9FAE020767A27DE7DB4602391ACFE5B27141013C3D4D22A2D677E1"
+  checkpoint_sha256:
+    5848: "82DDB36AFFD06A7C48ACCF6F91E8DE1C000C7307CB1DD8CCD804A31E1882A4BA"
+    11696: "6D30D87D0A513D678B6FF1F15AD85C024167B4425A46B7F098EBE896FC2ABFC6"
+    17544: "D878E212E32E5D57AAD01AAE1DB21733B0391FBE07E652A84FD39CA936A00455"
+    23391: "07090D4BD4B54E2AA672898ED07770292E5069AACBA8D1864F836B16BA708610"
