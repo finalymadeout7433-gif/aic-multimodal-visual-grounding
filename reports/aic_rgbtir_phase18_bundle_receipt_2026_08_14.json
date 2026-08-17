@@ -1,0 +1,14 @@
+{
+  "status": "PHASE_18_PRERENTAL_GO",
+  "bundle": "D:\\12525\\Documents\\pytorch\\aic_rgbtir_phase18_d1_cloud_bundle_20260814.zip",
+  "bytes": 141131975,
+  "sha256": "B00472004820EFF7C3A6BE4F07C53D49581BA277543435CA211202557EE6FF31",
+  "zip_entry_count": 34,
+  "zip_backslash_entry_count": 0,
+  "teacher_bank_sha256": "4A429B24353171CA1A887059A55D5597EF73A6E94E87B1C00D8582515E1567DD",
+  "teacher_bank_fingerprint": "79CF814B64EC640AD3D924342FEEED235764F139445F834B2CDB2DD0B580C05C",
+  "probe_records": 4096,
+  "dev_records": 1024,
+  "rgbtir_regression_tests": "50 passed",
+  "phase18_tests": "19 passed"
+}

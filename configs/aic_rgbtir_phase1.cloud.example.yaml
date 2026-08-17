@@ -1,0 +1,50 @@
+paths:
+  rgbt_root: "/home/featurize/data/RGBT_GroundBench/extracted"
+  phase0_manifest_root: "/home/featurize/aic_rgbtir_phase1_bundle/manifests"
+  phase0_summary: "/home/featurize/aic_rgbtir_phase1_bundle/phase0_run_summary.json"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase1_v1"
+  model_cache: "/home/featurize/work/model_cache/Qwen3-VL-8B-Instruct"
+
+model:
+  model_id: "Qwen/Qwen3-VL-8B-Instruct"
+  revision: "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+  vision_hidden_size: 1152
+  rgb_lora_rank: 0
+  tir_lora_rank: 48
+  lora_alpha: 48.0
+  lora_target_suffixes: ["attn.qkv", "attn.proj"]
+
+processor:
+  patch_size: 16
+  spatial_merge_size: 2
+  temporal_patch_size: 2
+  min_pixels: 262144
+  max_pixels: 1310720
+  black_threshold: 3
+  image_mean: [0.5, 0.5, 0.5]
+  image_std: [0.5, 0.5, 0.5]
+
+runtime:
+  seed: 20260812
+  minimum_vram_gib: 23.0
+  smoke_records: 10
+  overfit_steps: 200
+  tracer_steps: 800
+  full_epochs: 1.0
+
+loss:
+  hard_negative_weight: 0.25
+  margin: 0.15
+
+optimization:
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  gradient_accumulation: 4
+  max_grad_norm: 1.0
+  log_every_steps: 10
+  save_every_steps: 50
+
+gates:
+  gate_zero_max_abs_diff_bf16: 0.001
+  minimum_overfit_loss_improvement: 0.10
+  minimum_validation_loss_improvement: 0.02

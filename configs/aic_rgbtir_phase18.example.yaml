@@ -1,0 +1,11 @@
+# Copy to aic_rgbtir_phase18.local.yaml and replace only machine-local paths.
+extends: "aic_rgbtir_phase18.cloud.example.yaml"
+paths:
+  rgbt_root: "D:/AIC赛题一数据集/03_RGBT_GroundBench/extracted"
+  manifest_root: "../outputs/aic_rgbtir_phase16_recovery_returned_20260813/extracted/outputs/aic_rgbtir_phase16_recovery_v1/manifests"
+  teacher_bank: "../outputs/aic_rgbtir_phase16_recovery_returned_20260813/extracted/outputs/aic_rgbtir_phase16_recovery_v1/rgb_teacher_bank/teacher_bank.pt"
+  c2_reference: "../outputs/aic_rgbtir_phase16_recovery_returned_20260813/extracted/outputs/aic_rgbtir_phase16_recovery_v1/recovery_diagnostics/summary.json"
+  c2_probe_summary: "../outputs/aic_rgbtir_phase16_recovery_returned_20260813/extracted/outputs/aic_rgbtir_phase16_recovery_v1/probe_candidates/C2/summary.json"
+  output_root: "../outputs/aic_rgbtir_phase18_local_preflight_v1"
+  model_cache: "D:/12525/Documents/pytorch/model_cache/Qwen3-VL-8B-Instruct"
+  report: "../reports/aic_rgbtir_phase18_d1_probe_local.md"

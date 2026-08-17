@@ -1,0 +1,32 @@
+paths:
+  rgbt_root: "D:/AIC赛题一数据集/03_RGBT_GroundBench/extracted"
+  aic_root: "D:/初赛数据集-基于大模型的多模态视觉理解与推理"
+  aic_queries: "D:/初赛数据集-基于大模型的多模态视觉理解与推理/queries/queries.json"
+  output_root: "../outputs/aic_rgbtir_phase0_v1"
+  report_path: "../reports/aic_rgbtir_phase0_readiness_2026_08_12.md"
+
+processor:
+  patch_size: 16
+  spatial_merge_size: 2
+  temporal_patch_size: 2
+  min_pixels: 262144
+  max_pixels: 1310720
+  black_threshold: 3
+  image_mean: [0.5, 0.5, 0.5]
+  image_std: [0.5, 0.5, 0.5]
+
+audit:
+  workers: 4
+
+model_bridge:
+  deepstack_indexes: [8, 16, 24]
+  hidden_size: 1152
+  rgb_lora_rank: 0
+  tir_lora_rank: 48
+  lora_target_suffixes: ["attn.qkv", "attn.proj"]
+  fusion_initialization: zero_residual
+
+tracer:
+  seed: 20260812
+  train_count: 400
+  val_count: 100

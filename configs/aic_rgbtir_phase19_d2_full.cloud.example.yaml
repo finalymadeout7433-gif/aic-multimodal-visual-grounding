@@ -1,0 +1,124 @@
+scope:
+  full_training: true
+  sealed_dual_dev_selection: true
+  one_shot_official_val: true
+  forbid_query_training: true
+  forbid_fusion: true
+  forbid_depth: true
+  forbid_aic_test: true
+  forbid_fallback: true
+
+candidate:
+  name: "D2_G025"
+  geometry_lambda: 0.25
+  initialize_from: "D1_L050"
+  continue_from_probe_adapter: false
+
+paths:
+  rgbt_root: "/home/featurize/data/RGBT_GroundBench/extracted"
+  manifest_root: "/home/featurize/aic_rgbtir_phase19_d2_full_bundle/assets/manifests"
+  teacher_bank: "/home/featurize/aic_rgbtir_phase19_d2_full_bundle/assets/teacher_bank/teacher_bank.pt"
+  d1_adapter: "/home/featurize/aic_rgbtir_phase19_d2_full_bundle/assets/d1_selected/adapter.pt"
+  probe_summary: "/home/featurize/aic_rgbtir_phase19_d2_full_bundle/assets/probe_evidence/run_summary.json"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase19_d2_full_v1"
+  model_cache: "/home/featurize/full_model_cache"
+  report: "/home/featurize/aic_cloud/reports/aic_rgbtir_phase19_d2_full_2026_08_16.md"
+
+model:
+  model_id: "Qwen/Qwen3-VL-8B-Instruct"
+  revision: "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+  vision_hidden_size: 1152
+  rgb_lora_rank: 0
+  tir_lora_rank: 48
+  lora_alpha: 48.0
+  lora_target_suffixes: ["attn.qkv", "attn.proj"]
+
+expected_assets:
+  config.json:
+    bytes: 1474
+    sha256: "5CD452860DC1E9C29DD71CC3CEF7F39B338B7A40793F7A260655C2D3568F3661"
+  preprocessor_config.json:
+    bytes: 390
+    sha256: "27225450AC9C6529872EE1924FCB0962FF5634834F817040F444118116F4E516"
+  model.safetensors.index.json:
+    bytes: 67759
+    sha256: "520B2E05079402E9468A8701D03D1154D14B2599593AFB6EFFA7FB60C1BFF070"
+  model-00004-of-00004.safetensors:
+    bytes: 2716270024
+    sha256: "0A88B98E9F96270973F567E6A2C103EDE6CCDF915CA3075E21C755604D0377A5"
+
+processor:
+  patch_size: 16
+  spatial_merge_size: 2
+  temporal_patch_size: 2
+  min_pixels: 262144
+  max_pixels: 1310720
+  black_threshold: 3
+  image_mean: [0.5, 0.5, 0.5]
+  image_std: [0.5, 0.5, 0.5]
+
+runtime:
+  seed: 20260816
+  minimum_vram_gib: 23.0
+  minimum_host_ram_gib: 48.0
+  full_steps: 23391
+  checkpoint_fractions: [0.25, 0.50, 0.75, 1.0]
+  bootstrap_iterations: 2000
+  validation_checkpoint_pairs: 100
+
+loss:
+  temperature: 0.07
+  margin: 0.15
+  roi_expansion: 0.10
+  negative_count: 256
+  same_source_negatives: 128
+  same_condition_negatives: 64
+  relational_anchor_count: 64
+  layer_weights: {"8": 1.0, "16": 1.0, "24": 0.25, "final": 0.0}
+  pair_weight: 0.25
+  contrastive_weight: 1.0
+  relational_weight: 0.5
+  background_weight: 0.1
+  retention_weight: 0.5
+  geometry_weight: 0.25
+
+optimization:
+  learning_rate: 0.00005
+  weight_decay: 0.01
+  warmup_fraction: 0.05
+  gradient_accumulation: 4
+  max_grad_norm: 1.0
+
+gates:
+  minimum_dev_rank_vs_base: 0.85
+  minimum_rank_gain_each_dev: 0.02
+  maximum_semantic_r5_drop: 0.005
+  maximum_multiquery_r5_drop: 0.010
+  maximum_nonpaired_p95_delta: 0.02
+  maximum_official_absolute_drift: 0.02
+  minimum_effective_rank_vs_base: 0.85
+  minimum_effective_rank_vs_rgb: 0.75
+  maximum_nonpaired_p95_increase: 0.10
+  maximum_subgroup_degradation: 0.05
+  subgroup_minimum_records: 100
+  official_layer_r5_baseline: {"8": 0.9134, "16": 0.9070, "24": 0.7539}
+  official_layer_r5_maximum_drop: {"8": 0.005, "16": 0.005, "24": 0.010}
+
+expected:
+  full_records: 23391
+  full_pairs: 13310
+  full_sha256: "01587257901598FB072CD72AFE794C2DCB3A9F0E074750FB4B09484EBB390CA4"
+  semantic_records: 1024
+  semantic_pairs: 1024
+  semantic_sha256: "B9DFB8C4E47CAD542326BD25D5B2054EA7CADD64E6AA12BA72E2E7B84CD5D1D7"
+  multiquery_records: 1221
+  multiquery_pairs: 512
+  multiquery_sha256: "A54490B10BF9FC1BFB455C8052F883422D65038603E72CF650749E41D4DF363D"
+  official_val_records: 2032
+  official_val_pairs: 1115
+  official_val_sha256: "002FFB665CA8D0CBA545F2A7C4C342ED3B5708274922163B82E66955AF8E5E30"
+  teacher_bank_sha256: "B43CA908381DD42C4421FB3BF1A895DDD1C9396F40ED8B5BE2B51F2D2E966E08"
+  teacher_bank_fingerprint: "D8F01B557D9FAE020767A27DE7DB4602391ACFE5B27141013C3D4D22A2D677E1"
+  d1_adapter_sha256: "03D2C3D595495162DFCF2F0044CF06CE9B05AE2B52C1186B9A1434F64A5CED06"
+  probe_summary_sha256: "895C260ADF8C7E26C02F6046AC362C16AD7D33AE1025871C4CBA0453F87C8D8A"
+  adapter_tensors: 108

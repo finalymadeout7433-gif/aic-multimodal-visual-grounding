@@ -1,0 +1,30 @@
+scope:
+  query_interface_contract_only: true
+  forbid_training: true
+  forbid_official_val: true
+  forbid_aic_test: true
+  forbid_fusion: true
+
+paths:
+  repair_dev: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/manifests/repair_dev.jsonl"
+  train_clean: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/manifests/train_clean.jsonl"
+  d1_probe_adapter: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/d1_probe/adapter.pt"
+  tokenizer_root: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/tokenizer"
+  tokenizer_json: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/tokenizer/tokenizer.json"
+  tokenizer_config: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/tokenizer/tokenizer_config.json"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase18_q0_v1"
+
+interface:
+  embedding_dimension: 1152
+runtime:
+  seed: 20260812
+  maximum_records: 128
+expected:
+  repair_dev_records: 1024
+  train_clean_records: 26477
+expected_assets:
+  repair_dev: {bytes: 617828, sha256: "B9DFB8C4E47CAD542326BD25D5B2054EA7CADD64E6AA12BA72E2E7B84CD5D1D7"}
+  train_clean: {bytes: 16414828, sha256: "1AC9B1DCBA1FB240A95E756C4ADC8635DB82A523428B4B520B0ACB3C0D5EFBFB"}
+  d1_probe_adapter: {bytes: 17951066, sha256: "11509951459607F3E7AF70B9BBD21E09272CA587722EBD6DDFBCB9A955DF0E2C"}
+  tokenizer_json: {bytes: 7032403, sha256: "A5D85B6DCC535E6B93115A9EF287E6132FDBF30270DA6218194BA742261173C7"}
+  tokenizer_config: {bytes: 10868, sha256: "C2DA771801886AD9AE98181793FFD3DFB7F1AF30F6F7C6A4E15D7DBBA52E2399"}
