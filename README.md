@@ -5,6 +5,7 @@
 如果是在 GitHub 页面浏览本仓库，优先打开：
 
 - [RGB–TIR 红外模块持续更新技术报告](reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md)
+- [RGB–TIR 完整优化、验证与下一阶段路线（截至 2026-08-23）](reports/AIC_RGB_TIR_FULL_ROUTE_OPTIMIZATION_VALIDATION_AND_NEXT_PLAN_2026_08_23.md)
 - [RGB–TIR 模块代码与复现入口](src/aic_rgbtir/README.md)
 - [Phase 1.9-D2 Full 结果与未通过原因](reports/aic_rgbtir_phase19_d2_full_result_analysis_2026_08_17.md)
 - [AIC 项目导航](AIC_PROJECT_INDEX.md)

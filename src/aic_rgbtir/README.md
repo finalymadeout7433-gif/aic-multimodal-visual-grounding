@@ -5,11 +5,15 @@ repository deliberately keeps RGB as the frozen control path and treats TIR as a
 rejectable residual source. Representation experiments must pass their own gates
 before Query conditioning, fusion, bbox generation, or AIC platform claims are made.
 
-The current research status is `PHASE_19_D2_FULL_NO_GO`: D2 geometry retention
-preserved strong retrieval and improved rank relative to D1, but the best
-multi-query effective-rank/Base value was `0.840168`, below the pre-registered
-`0.85` dual-dev threshold. No Phase 1.9 selected Adapter was released and sealed
-official-val remained unopened.
+The current research status is `STOP_CURRENT_12D_QUALITY_PROXY_ROUTE`. Work after
+D2 established a useful but narrower result: D3_SP000 frozen features passed the
+locked G1R shared-head dev and confirmation probe, while static Layer16 G2,
+Query-conditioned control, and the current 12-dimensional pair-level
+quality/registration gate did not generalize through their pre-registered gates.
+The strongest quality-proxy upper-bound probe reached OOF Spearman `0.22666`, but
+beneficial-vs-harmful AUC was only `0.59024` with a confidence interval crossing
+chance. No RGB-TIR Adapter has been released, official validation remains sealed
+where required, and no AIC RGB-TIR platform gain is claimed.
 
 ## Architectural invariants
 
@@ -40,6 +44,12 @@ official-val remained unopened.
 | `phase18r_audit.py` | Record/pair-level rank, retrieval and ExcessDrift re-audit |
 | `phase19_d2.py` | Base-TIR neighborhood geometry probe |
 | `phase19_d2_full.py` | D2_G025 full train, dual-dev gate, Stage A/official boundary |
+| `phase19_d3.py` / `phase19_d3a.py` | Same-pair structure probes and strict ROI/layer audits |
+| `sidebranch_interface.py` | Causal Layer16 sidebranch and exact RGB/invalid-TIR bypass |
+| `phase19_g1.py` / `phase19_g1_protocol.py` | Frozen Query-to-ROI feature probe and locked local evaluation |
+| `phase19_g2_layer16.py` / `phase19_g2_evaluation.py` | Layer16-only zero-init residual and formal dual-dev closeout |
+| `phase19_query_gate.py` / `phase19_query_control_v2.py` | Query-gate probes with wrong/shuffled-Query controls |
+| `phase19_quality_registration_gate.py` | Query-free quality/registration gate and negative controls |
 | `query_probe.py` | Frozen Query interface smoke only; not a grounding claim |
 | `artifacts.py` | Fingerprints and deterministic artifact handling |
 
@@ -55,12 +65,19 @@ Phase 1.8     Base-relative retention (D1_L050)
 Phase 1.8R    persistent full train + sealed official-val + local audit
 Phase 1.9     Base-TIR geometry probe and D2_G025 full dual-dev gate
 Phase 1.9-A   four-checkpoint, dual-dev per-layer spectrum audit; no training
-next          define one layer-selective D3 candidate from audit evidence only
+Phase 1.9-D3  same-pair structure probe + strict ROI/layer audit
+Phase 1.9-G0  causal sidebranch interface trace; no training
+Phase 1.9-G1  frozen six-arm Query-to-ROI probe + locked confirmation
+Phase 1.9-G2  Layer16-only residual; semantic/multi-query dual-dev NO_GO
+Phase 1.9-Q   Query-control probes; wrong Query control NO_GO
+Phase 1.9-QR  quality/registration gate + adaptivity/upper-bound audit
+next          candidate/ROI-level Rescue-Harm predictability upper bound; local first
 ```
 
 The full chronology, metrics, failure analysis, and decision boundaries live in
-`reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md`. The latest standalone result is
-`reports/aic_rgbtir_phase19_d2_full_result_analysis_2026_08_17.md`.
+`reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md`. The self-contained route audit
+for web review is
+`reports/AIC_RGB_TIR_FULL_ROUTE_OPTIMIZATION_VALIDATION_AND_NEXT_PLAN_2026_08_23.md`.
 
 ## Local checks
 

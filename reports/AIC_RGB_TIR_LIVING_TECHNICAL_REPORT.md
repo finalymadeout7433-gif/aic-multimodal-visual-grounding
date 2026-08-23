@@ -1,10 +1,10 @@
 # AIC RGB–TIR 红外模块持续更新技术报告
 
 > 文档性质：持续更新（Living Document）
-> 当前版本：v2.0
-> 最近更新：2026-08-17（Asia/Shanghai）
+> 当前版本：v3.0
+> 最近更新：2026-08-23（Asia/Shanghai）
 > 当前分支：`agent/rgbtir-module-phase19-sync`
-> 当前阶段：Phase 1.9-D2 Full 已完成双 dev 选择并得到 `PHASE_19_D2_FULL_NO_GO`；official val 保持封存
+> 当前阶段：D3/G0/G1/G2、Query-control、quality/registration gate 与 12 维 proxy 上限审计均已完成；当前状态 `STOP_CURRENT_12D_QUALITY_PROXY_ROUTE`
 > 适用项目：2026 AIC 算法挑战赛赛题一「基于大模型的多模态视觉理解与推理」
 
 ## 阅读与更新约定
@@ -30,7 +30,7 @@
 
 # 一、算法概述
 
-本项目面向 AIC 多模态语言引导目标定位任务：模型接收可见光、红外、深度图像和英文 Query，输出目标在原始 RGB 图像坐标系中的归一化边界框。当前红外路线以已验证的 Qwen3-VL RGB-only 能力为锚点，不复制第二套完整视觉大模型，而是在共享 Qwen3-VL 视觉塔上增加 TIR 专用低秩适配器，通过同步几何预处理、红外有效视场 mask、DeepStack 多层特征接口和零初始化残差，为模型提供可拒绝的红外增量证据。算法设计强调“先保护 RGB，再学习红外；先证明表征健康，再验证 Query 相关性，最后才融合”。现阶段已完成数据与接口验收、TIR rank-48 Adapter 训练、全量表征验证、低秩坍缩诊断、InfoNCE/关系蒸馏去坍缩、Base-relative retention、Phase 1.8R sealed official-val、本地口径复核，以及 Phase 1.9-D2 的谱几何保持 probe 与 full train。最新证据表明：D2 能在双 dev 上进一步恢复有效秩并保持强检索，但 full train 的 multi-query dev 最低有效秩/Base 最好为 `0.840168`，仍低于预注册 `0.85`。因此本轮没有 selected Adapter，也没有打开 official val；尚未进入正式 Query-aware RGB–TIR 融合，更未证明 AIC 平台增益。
+本项目面向 AIC 多模态语言引导目标定位任务：模型接收可见光、红外、深度图像和英文 Query，输出目标在原始 RGB 图像坐标系中的归一化边界框。当前红外路线以已验证的 Qwen3-VL RGB-only 能力为锚点，不复制第二套完整视觉大模型，而是在共享 Qwen3-VL 视觉塔上增加 TIR 专用低秩适配器，通过同步几何预处理、红外有效视场 mask、DeepStack 多层特征接口和零初始化残差，为模型提供可拒绝的红外增量证据。算法设计强调“先保护 RGB，再学习红外；先证明表征健康，再验证 Query 相关性，最后才融合”。D2 之后，项目完成了 D3/D3A 层级结构审计、Frozen-8B 四臂和六臂控制、G0 因果接口 trace、G1/G1R 冻结 Query-to-ROI probe、G2 Layer16 residual、Query-control、quality/registration gate 和 12 维 proxy 上限测试。最新证据表明：D3_SP000 冻结特征在 G1R confirmation 中相对 Base TIR 有稳定正信号，但 G2 在 multi-query dev 失败；Query gate 对正确 Query 不优于错误 Query；现有 12 维全图质量 gate 不优于常数 gate，beneficial-vs-harmful AUC 上限仅 `0.59024`。因此当前没有 selected Adapter，也未证明 AIC 平台增益。下一步只允许本地进行候选/ROI 级 Rescue-Harm 可预测性上限测试，不能继续调旧 gate、进入 D4、打开 official-val、迁移 30B 或加入 Depth。
 
 ---
 
@@ -283,7 +283,17 @@ Retention 与再次提高 paired loss 不同：只有 adapted TIR 比 Base TIR �
 | 2026-08-16 | Phase 1.8R-Audit | `BOTH_REQUIRED` | 三套检索口径、记录/图像对秩、ExcessDrift、安全状态复核 | 历史 safety 失败可修；记录级秩与绝对漂移仍是真实模型问题 |
 | 2026-08-16 | Phase 1.9-D2 probe | `PHASE_19_D2_PROBE_GO` | G010/G025/G050 单变量谱几何保持 | G025 在秩恢复与 nonpaired P95 之间折中最佳；G050 因 P95 NO-GO |
 | 2026-08-16～17 | Phase 1.9-D2 full | `PHASE_19_D2_FULL_NO_GO` | 23,391 step、四 checkpoint、双 dev 选择、Stage A 回传 | Multi-query 最低秩/Base 最好 84.02% < 85%；未产生 selected Adapter，official-val 保持封存 |
-| 2026-08-17 | GitHub 技术归档 | 当前 | 同步代码、配置、测试、云端门禁脚本和主技术报告 | 尚未进入正式融合与 AIC 多模态提交 |
+| 2026-08-17 | D2 Layer Audit | `COMPLETE` | 四 checkpoint、双 dev、Layer 8/16/24 逐层谱审计 | 三层轻度压缩，L8 最低；不是单层灾难 |
+| 2026-08-18 | Phase 1.9-D3/D3A | `NO_GO / COMPLETE` | SP000/005/010/020、严格无效 ROI 排除、层轨迹与 AIC 同风格诊断 | SP020 绝对过线但材料性不足；收益集中 L24 且伴随 P95 风险 |
+| 2026-08-20 | Frozen-8B 四臂 | `FROZEN8B_FOUR_ARM_NO_GO` | RGB/correct/random/misaligned TIR，295 records | Correct TIR 未稳定优于 RGB 或负对照 |
+| 2026-08-21 | Frozen-8B 六臂 | `PROTOCOL_CONTROL_NO_GO_REPAIR_INTERFACE` | Native/null/correct 的 A/B 重复控制 | null 双图已改变输出，旧双图比较存在输入结构混杂 |
+| 2026-08-21 | G0 Interface Trace | `PHASE19_INTERFACE_TRACE_GO` | Layer16 sidebranch、alpha=0、TIR=None/nonfinite | 因果 sidebranch seam 与 RGB 硬旁路成立 |
+| 2026-08-21～22 | G1/G1R | `DEV_GO / CONFIRMATION_GO` | 六历史臂冻结特征、共享 K=8 head、锁定 confirmation | D3_SP000 有可读任务信息，但不是端到端 bbox GO |
+| 2026-08-22 | G2 Layer16 | `G2_DEV_NO_GO` | 只训练 Layer16 projector/scale，四 checkpoint，双 dev | semantic 通过、multi-query 失败；静态 residual 泛化不稳 |
+| 2026-08-22～23 | Query Gate / QueryControlV2 | `DUAL_DEV_NO_GO` | correct/wrong/shuffled Query 控制 | wrong Query 不更差；停止 Query-conditioned residual |
+| 2026-08-23 | Quality/Registration Gate | `SCREEN_NO_GO` | 12 维 query-free gate、constant/full/shuffled/misaligned 控制 | 残差有静态信号，但 learned gate 无自适应价值 |
+| 2026-08-23 | 12D Proxy Upper Bound | `STOP_CURRENT_12D_QUALITY_PROXY_ROUTE` | pair-disjoint ExtraTrees/Ridge、置换与 bootstrap | 弱连续相关存在，benefit/harm AUC 近随机，停止旧 proxy |
+| 2026-08-23 | GitHub 技术归档补齐 | 本地文档完成 | 总路线报告、README 与 Living Report 更新 | 代码/报告需分批审查后再 commit/push；仍无 AIC 多模态提交 |
 
 ---
 
@@ -578,17 +588,23 @@ D1 不要求 TIR 完全复制 RGB，而是将 Base TIR 作为最低共享语义�
 - D2 Base-TIR 邻域几何保持对有效秩恢复有效，`D2_G025` 的 probe 折中优于 G010/G050；
 - D2 full 的 multi-query 绝对有效秩最好为 `0.840168`，未达到预注册 `0.85`，且 50% 以后没有继续改善；
 - Phase 1.9-D2 Full 没有合格 selected Adapter，sealed official-val 没有打开；
-- RGB 质量和假负例代理尚不足以支持对应分支；
-- 当前唯一有证据支持的下一步是对四个 D2 checkpoint 做逐层谱审计，再决定最小的层选择性修复。
+- D3_SP020 的谱改善主要集中 Layer 24，L8 已平台化，且深层 nonpaired P95 风险同步增大；
+- Frozen-8B 四臂未证明 Correct TIR 稳定优于 RGB/random/misaligned；六臂进一步发现旧双图输入协议混杂；
+- G0 sidebranch 已证明 alpha=0 和 invalid TIR 可严格旁路；
+- G1R 证明 D3_SP000 冻结特征存在共享 head 可读的任务信息，并在锁定 confirmation 复现；
+- G2 Layer16 residual、Query gate 和 QueryControlV2 均未通过双 dev／Query-control 门禁；
+- 现有 12 维 quality/registration learned gate 不优于 constant gate，且 beneficial-vs-harmful AUC 上限仅 `0.59024`；
+- 当前唯一有证据支持的下一步是 candidate/ROI-level Rescue-Harm 可预测性上限测试。
 
 ## 尚未验证
 
-- Query 是否能够利用 D1/D2 TIR 特征；
-- RGB+TIR 是否提高 RGBT-GroundBench grounding ACC；
-- 红外融合的 Rescue/Harm；
+- candidate/ROI 局部特征能否可靠预测 residual 的 Rescue/Harm；
+- 最小 ROI-local gate 能否同时通过 semantic 与 multi-query dev；
+- 新的 image-pair/sequence-disjoint confirmation 能否复现；
+- RGB+TIR 是否提高端到端 RGBT grounding ACC；
 - AIC 平台 ACC 是否超过 8B RGB-only 0.7582；
 - Shared/Complementary 双分支是否必要；
-- Query/Quality/Registration 三重门控是否优于更简单结构；
+- TIR proposal + RGB ranking 是否比 hidden residual 更可控；
 - 红外模块能否安全迁移到 30B；
 - Depth 融合收益。
 
@@ -754,17 +770,42 @@ Codex 作为工程辅助工具参与代码实现、审计、验证和文档整�
 
 ---
 
-# 十六、当前唯一结论
+# 十六、当前唯一结论（2026-08-23）
 
-当前最重要的矛盾不是“如何尽快把红外接进 Qwen”，而是：
+D2 之后的实验已经把矛盾从“最低层有效秩能否过 0.85”进一步定位为：
 
-> 如何让 TIR 在保留 D1/D2 强检索和已恢复关系结构时，把 multi-query 最差层的记录级有效秩从约 84% 稳定提高到 85%以上，并且最终只在 Query 和图像条件真正需要红外时提供增量证据。
+> **TIR 残差包含局部可读信息，但现有全图质量 proxy 和 Query gate 都不能稳定判断这个残差对某个 Query、某个候选究竟是 Rescue 还是 Harm。**
 
-因此当前唯一下一步是 `PHASE_19_D2_LAYER_AUDIT`，随后才允许定义一个层选择性 D3 probe。在 representation 双 dev 通过以前，不启动 Shared/Complementary 双分支、不加入三重门控、不做正式 AIC RGB–TIR 提交，也不迁移 30B 或引入 Depth。
+关键证据链为：
+
+1. D3_SP020 改善 rank，但材料性增益不足且主要集中于 Layer 24；
+2. G1R 的 D3_SP000 冻结特征在锁定 confirmation 上相对 Base TIR 获得 R@1 `+0.04981`，证明信息并非为空；
+3. G2 静态 Layer16 residual 只通过 semantic dev，multi-query dev 失败；
+4. QueryControlV2 虽提高正确 Query 的 R@1，但 wrong Query 略好，不能归因 Query 控制；
+5. quality/registration learned gate 与 constant gate 的 R@1 完全相同，且 gate 大小与真实 residual 收益负相关；
+6. 更强 ExtraTrees 上限探针 OOF Spearman 为 `0.22666`，但 beneficial-vs-harmful AUC 仅 `0.59024`，不足以做安全选择。
+
+当前唯一下一步是本地、只读的 `candidate/ROI-level Rescue-Harm predictability upper bound`：把控制粒度从整张图像对下沉到 Query×ROI／候选，比较全图 proxy、局部质量、表征冲突和 Query 交互的增量价值。只有该上限通过预注册的 pair/sequence-disjoint 门禁，才允许实现最小 Layer16 local gate；如果仍接近随机，应停止 hidden-residual 路线，转向 TIR proposal + RGB ranking 的可审计 late-rescue 架构。
+
+完整的 D3 至当前证据、数值和下一阶段合同见：
+
+`reports/AIC_RGB_TIR_FULL_ROUTE_OPTIMIZATION_VALIDATION_AND_NEXT_PLAN_2026_08_23.md`
 
 ---
 
 # 十七、更新日志
+
+## v3.0 — 2026-08-23
+
+- 补充 D3/D3A 的 same-pair structure、严格无效 ROI 排除和层间响应审计；
+- 补充 Frozen-8B 四臂任务价值 NO_GO 与六臂输入协议混杂；
+- 补充 G0 sidebranch interface trace 的零残差和非法 TIR 硬旁路 GO；
+- 补充 G1/G1R 共享冻结 head 的 dev/confirmation GO，并明确它不是端到端 bbox GO；
+- 补充 G2 Layer16-only residual 双-dev NO_GO、BF16 checkpoint 哈希修复和 scale 量化平台诊断；
+- 补充 Query gate / QueryControlV2 的 wrong-Query 反证；
+- 补充 quality/registration gate、learned-vs-constant 自适应归因和 12 维 proxy 上限测试；
+- 将当前路线从继续 D2/D3 谱修复改为 candidate/ROI-level Rescue-Harm 可预测性上限；
+- 保持 no selected Adapter、no AIC gain claim、official-val/confirmation 封存与 30B/Depth/D4 阻断边界。
 
 ## v2.0 — 2026-08-17
 
