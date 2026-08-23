@@ -1,0 +1,18 @@
+{
+  "status": "PHASE_18R_PRERENTAL_GO",
+  "bundle": "D:/12525/Documents/pytorch/aic_rgbtir_phase18r_5090_cloud_bundle_20260815.zip",
+  "bundle_sha256": "E77505630D4D611FC9A960437268063C50F5587AEB253957518FB5D998F31EE9",
+  "bundle_bytes": 21772558,
+  "local_rgbtir_tests": {
+    "passed": 65,
+    "failed": 0
+  },
+  "extracted_bundle_tests": {
+    "passed": 41,
+    "failed": 0
+  },
+  "manifest_hash_mismatches": 0,
+  "minimum_gpu": "RTX 5090 32GB",
+  "minimum_host_ram_gib": 48,
+  "recommended_host_ram_gib": 64
+}

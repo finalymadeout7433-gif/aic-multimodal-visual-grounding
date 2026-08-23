@@ -1,0 +1,5 @@
+name: D1_L050
+objective: C2_PLUS_BASE_TIR_RETENTION
+initialization: FRESH_IDENTICAL_RANK48
+seed: 20260812
+retention_lambda: 0.50

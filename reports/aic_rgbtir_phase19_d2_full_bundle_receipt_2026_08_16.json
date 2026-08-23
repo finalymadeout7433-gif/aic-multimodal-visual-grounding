@@ -1,0 +1,46 @@
+{
+  "status": "PHASE_19_D2_FULL_LOCAL_PRERENTAL_READY",
+  "phase": "1.9-D2-Full",
+  "candidate": "D2_G025",
+  "zip": "D:/12525/Documents/pytorch/aic_rgbtir_phase19_d2_full_cloud_bundle_20260816.zip",
+  "bytes": 763466291,
+  "sha256": "3341D461D4843BFFF85E0E25030FF68E14010F1DF82DC8D74C9A0198593FCD5A",
+  "zip_entries": 42,
+  "manifest_files_verified": 41,
+  "zip_hash_validation": "ZIP_FULL_HASH_GO",
+  "asset_preflight": "PHASE_19_D2_FULL_PREFLIGHT_GO",
+  "regression_tests": {
+    "passed": 33,
+    "failed": 0
+  },
+  "python_compile": "PASS",
+  "bash_syntax": "PASS",
+  "git_diff_check": "PASS",
+  "ruff": "NOT_INSTALLED_NON_BLOCKING",
+  "full_train": {
+    "records": 23391,
+    "unique_pairs": 13310
+  },
+  "semantic_dev": {
+    "records": 1024,
+    "unique_pairs": 1024
+  },
+  "multiquery_dev": {
+    "records": 1221,
+    "unique_pairs": 512
+  },
+  "official_val": {
+    "records": 2032,
+    "unique_pairs": 1115,
+    "sealed_until_dual_dev_go": true
+  },
+  "teacher_bank_records": 27668,
+  "teacher_bank_fingerprint": "D8F01B557D9FAE020767A27DE7DB4602391ACFE5B27141013C3D4D22A2D677E1",
+  "checkpoint_contract": [
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "claim_boundary": "TIR representation full training and validation only; no Query, fusion, Depth, AIC test, submission, fallback or platform-score claim"
+}

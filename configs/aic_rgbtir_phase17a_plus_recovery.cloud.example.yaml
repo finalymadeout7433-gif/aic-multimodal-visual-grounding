@@ -1,0 +1,30 @@
+paths:
+  rgbt_root: "/home/featurize/data/RGBT_GroundBench/extracted"
+  repair_dev_manifest: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase16_recovery_v1/manifests/repair_dev.jsonl"
+  phase16_output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase16_recovery_v1"
+  model_diagnostics: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase16_recovery_v1/recovery_diagnostics/C2.json"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase17a_plus_recovery_v1"
+  report: "/home/featurize/aic_cloud/reports/aic_rgbtir_phase17a_plus_recovery_2026_08_13.md"
+
+assets:
+  c1_adapter: "probe_candidates/C1/adapter.pt"
+  c2_adapter: "probe_candidates/C2/adapter.pt"
+  teacher_bank: "rgb_teacher_bank/teacher_bank.pt"
+  c1_summary: "probe_candidates/C1/summary.json"
+  c2_summary: "probe_candidates/C2/summary.json"
+
+runtime:
+  seed: 20260812
+  expected_records: 1024
+  expected_pairs: 1024
+  negative_count: 256
+
+decision:
+  quality_association_threshold: 0.30
+  false_negative_rate_threshold: 0.20
+
+claim_boundary:
+  training: false
+  aic_test_data: false
+  platform_submission: false
+  model_fallback: false

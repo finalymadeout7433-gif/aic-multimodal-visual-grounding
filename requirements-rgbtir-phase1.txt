@@ -1,0 +1,13 @@
+# The Featurize CUDA image provides PyTorch. Do not reinstall torch blindly.
+transformers==4.57.6
+accelerate==1.14.0
+huggingface_hub==0.36.2
+safetensors==0.8.0
+PyYAML>=6.0,<7
+Pillow>=10,<12
+opencv-python-headless==4.10.0.84
+numpy==1.26.4
+scipy>=1.13,<2
+tqdm>=4.66,<5
+pytest>=8,<9
+packaging>=24,<26

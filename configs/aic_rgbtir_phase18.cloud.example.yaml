@@ -1,0 +1,118 @@
+scope:
+  probe_only: true
+  forbid_full_training: true
+  forbid_official_val: true
+  forbid_aic_test: true
+
+paths:
+  rgbt_root: "/home/featurize/data/RGBT_GroundBench/extracted"
+  manifest_root: "/home/featurize/aic_rgbtir_phase18_bundle/assets/manifests"
+  teacher_bank: "/home/featurize/aic_rgbtir_phase18_bundle/assets/teacher_bank/teacher_bank.pt"
+  c2_reference: "/home/featurize/aic_rgbtir_phase18_bundle/assets/c2_reference/c2_reference.json"
+  c2_probe_summary: "/home/featurize/aic_rgbtir_phase18_bundle/assets/c2_reference/c2_probe_summary.json"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase18_d1_probe_v1"
+  model_cache: "/home/featurize/work/model_cache/Qwen3-VL-8B-Instruct"
+  report: "/home/featurize/aic_cloud/reports/aic_rgbtir_phase18_d1_probe_2026_08_14.md"
+
+model:
+  model_id: "Qwen/Qwen3-VL-8B-Instruct"
+  revision: "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+  vision_hidden_size: 1152
+  rgb_lora_rank: 0
+  tir_lora_rank: 48
+  lora_alpha: 48.0
+  lora_target_suffixes: ["attn.qkv", "attn.proj"]
+
+expected_assets:
+  config.json:
+    bytes: 1474
+    sha256: "5CD452860DC1E9C29DD71CC3CEF7F39B338B7A40793F7A260655C2D3568F3661"
+  preprocessor_config.json:
+    bytes: 390
+    sha256: "27225450AC9C6529872EE1924FCB0962FF5634834F817040F444118116F4E516"
+  model.safetensors.index.json:
+    bytes: 67759
+    sha256: "520B2E05079402E9468A8701D03D1154D14B2599593AFB6EFFA7FB60C1BFF070"
+  model-00004-of-00004.safetensors:
+    bytes: 2716270024
+    sha256: "0A88B98E9F96270973F567E6A2C103EDE6CCDF915CA3075E21C755604D0377A5"
+
+processor:
+  patch_size: 16
+  spatial_merge_size: 2
+  temporal_patch_size: 2
+  min_pixels: 262144
+  max_pixels: 1310720
+  black_threshold: 3
+  image_mean: [0.5, 0.5, 0.5]
+  image_std: [0.5, 0.5, 0.5]
+
+runtime:
+  seed: 20260812
+  minimum_vram_gib: 23.0
+  probe_steps: 4096
+  full_steps: 0
+  checkpoint_fractions: [0.25, 0.50, 0.75, 1.0]
+
+loss:
+  temperature: 0.07
+  margin: 0.15
+  roi_expansion: 0.10
+  negative_count: 256
+  same_source_negatives: 128
+  same_condition_negatives: 64
+  relational_anchor_count: 64
+
+optimization:
+  learning_rate: 0.00005
+  weight_decay: 0.01
+  warmup_fraction: 0.05
+  gradient_accumulation: 4
+  max_grad_norm: 1.0
+
+candidates:
+  - name: "D1_L010"
+    retention_lambda: 0.10
+  - name: "D1_L025"
+    retention_lambda: 0.25
+  - name: "D1_L050"
+    retention_lambda: 0.50
+
+retention:
+  tolerance:
+    "8": 0.02
+    "16": 0.02
+    "24": 0.01
+    final: 0.0
+
+c2_reference:
+  mean_r_at_1: 0.5979817708333334
+  mean_r_at_5: 0.8359375
+  layer_drift:
+    "8": 0.1289336085319519
+    "16": 0.15261441469192505
+    "24": 0.3837621808052063
+
+gates:
+  maximum_r1_drop: 0.010
+  maximum_r5_drop: 0.005
+  minimum_layer24_drift_reduction: 0.25
+  minimum_effective_rank_vs_base: 0.85
+  minimum_effective_rank_vs_rgb: 0.75
+  maximum_nonpaired_p95_increase: 0.10
+  # Compatibility keys consumed by the shared Phase 1.6 optimizer config.
+  minimum_alignment_improvement: -100.0
+  minimum_retrieval_gain: -100.0
+
+expected:
+  probe_records: 4096
+  probe_pairs: 4096
+  dev_records: 1024
+  dev_pairs: 1024
+  official_val_records: 2032
+  official_val_pairs: 1115
+  teacher_bank_records: 5120
+  teacher_bank_sha256: "4A429B24353171CA1A887059A55D5597EF73A6E94E87B1C00D8582515E1567DD"
+  teacher_bank_fingerprint: "79CF814B64EC640AD3D924342FEEED235764F139445F834B2CDB2DD0B580C05C"
+  c2_reference_sha256: "D7AE7CC867982C52ABBD96F84200DC1F62626E9D4C7B217CA5486131C29706D0"
+  c2_probe_summary_sha256: "874A7492492C428DE4BCAC2D364A2EFD649D35F5892DC4C268A574C760E73704"

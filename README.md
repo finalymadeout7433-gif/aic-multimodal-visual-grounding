@@ -1,5 +1,35 @@
 # 2026 AIC 多模态视觉定位 Baseline
 
+## 先从这里看
+
+如果是在 GitHub 页面浏览本仓库，优先打开：
+
+- [RGB–TIR 红外模块持续更新技术报告](reports/AIC_RGB_TIR_LIVING_TECHNICAL_REPORT.md)
+- [RGB–TIR 完整优化、验证与下一阶段路线（截至 2026-08-23）](reports/AIC_RGB_TIR_FULL_ROUTE_OPTIMIZATION_VALIDATION_AND_NEXT_PLAN_2026_08_23.md)
+- [RGB–TIR 模块代码与复现入口](src/aic_rgbtir/README.md)
+- [Phase 1.9-D2 Full 结果与未通过原因](reports/aic_rgbtir_phase19_d2_full_result_analysis_2026_08_17.md)
+- [AIC 项目导航](AIC_PROJECT_INDEX.md)
+- [排行榜结果](reports/leaderboard_results.md)
+- [提交包索引](reports/submission_package_index.md)
+- [Qwen3-VL-8B 平台结果与下一轮模型路线](reports/qwen3_vl_8b_platform_result_2026_08_07.md)
+
+当前最高分：`Qwen3-VL-8B-Instruct zero-shot = 0.7582`。
+
+对应本地提交包：
+
+```text
+D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_Qwen3_VL_8B_Instruct_zero_shot_20260807.zip
+```
+
+上一轮 `0.7210` 的模型是 `nvidia/LocateAnything-3B`，它是当前第二高分的零训练模型。对应报告与提交包：
+
+- [LocateAnything-3B 平台结果报告](reports/locateanything_3b_platform_result_2026_08_05.md)
+- 本地提交包：
+
+```text
+D:\12525\Documents\pytorch\aic_cloud_upload_4090_v1\platform_upload_ready\AIC_LocateAnything_3B_zero_shot_v1.zip
+```
+
 第一版可完整运行的 RGB-only 基线：
 
 ```text
@@ -7,6 +37,55 @@ Visible + Query → Florence-2-large-ft → 归一化 bbox → 提交 JSON/ZIP
 ```
 
 当前版本：`v0.2.1`。正式初赛数据没有 bbox，只用于推理，不用于训练。
+
+## 诊断与 Ranker 实验分支
+
+当前实验分支记录了两轮受控工作：
+
+1. Florence 候选上限、Tile 小目标与 GroundingDINO-Tiny 零样本诊断；
+2. GroundingDINO Top-10 + LightGBM Spatial LTR 候选排序训练。
+
+对应报告：
+
+- [诊断实验报告](reports/diagnostic_oracle_tile_gdino_round.md)
+- [Spatial LTR 训练报告](reports/gdino_spatial_ltr_v1_training_report.md)
+- [平台结果与负迁移复盘](reports/gdino_spatial_ltr_v1_platform_postmortem.md)
+- [排行榜记录](reports/leaderboard_results.md)
+
+平台结果必须和外部本地验证分开解释：
+
+| 系统 | 外部 holdout ACC@0.5 | AIC 平台 ACC@0.5 |
+|---|---:|---:|
+| Florence-2 RGB-only first | 未在本轮 holdout 重测 | **0.4980** |
+| GroundingDINO-Tiny Top-1 | 0.5211 | **0.4938** |
+| GroundingDINO + Spatial LTR | 0.6333 | **0.3190** |
+
+Spatial LTR 的外部提升没有迁移到 AIC，因此该模型被标记为研究失败，不是推荐提交。
+代码仍保留，用于复现负迁移、改进目标/参照物建模和设计保守切换消融。
+
+## 三个开源模型零训练全量对照
+
+APE-Ti、MM-Grounding-DINO-T 和 LLMDet-Swin-T 均已使用 Visible RGB 与原始
+英文 Query 完成 9,555 条 AIC 测试集零训练推理。三者均使用模型原生 Top-1，
+没有使用 AIC 图像、Query、候选框或伪标签训练。
+
+| 模型 | 基础定位 | AIC 平台 ACC@0.5 | 相对 Florence-2 |
+|---|---|---:|---:|
+| MM-Grounding-DINO-T | OpenMMLab 的可训练统一检测/grounding 基座 | **0.5011** | **+0.31 pp** |
+| Florence-2-large-ft | 当前 RGB-only 控制基线 | 0.4980 | — |
+| LLMDet-Swin-T | 在 MM-GDINO 上加入长描述/LLM 监督 | 0.4942 | -0.38 pp |
+| APE-Ti | 同时覆盖前景物体、background stuff 和区域描述 | 0.4424 | -5.56 pp |
+
+`0.4942` 的平台结果属于 LLMDet-Swin-T；MM-Grounding-DINO-T 的正确平台结果
+是 `0.5011`。该归属在 2026-08-02 根据用户提供的平台截图完成纠正。
+MM-Grounding-DINO-T 因此成为当前已验证的最高分单模型，但领先 Florence-2
+只有 0.31 个百分点，后续仍应采用单变量平台实验确认改动收益。
+
+对应资料：
+
+- [三模型基础资料、环境、权重指纹与全量报告](reports/aic_three_model_zero_shot_full_report.md)
+- [无标签预测行为对照](reports/aic_three_model_zero_shot_behavior.md)
+- [完整排行榜记录](reports/leaderboard_results.md)
 
 ## 安装
 
@@ -114,4 +193,5 @@ reports/   实验、排行榜、数据和训练策略结论
 outputs/   本地输出，不上传 Git
 ```
 
-当前限制：尚未使用 Infrared、Depth、Query 改写或候选框重排序。
+当前限制：已实验 RGB 候选框重排序，但尚未使用 Infrared、Depth 或 Query 改写；
+现有 Spatial LTR 在 AIC 平台发生严重负迁移，不能作为生产提交策略。

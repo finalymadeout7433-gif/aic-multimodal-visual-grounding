@@ -1,0 +1,22 @@
+scope:
+  real_query_hidden_smoke_only: true
+  forbid_training: true
+  forbid_visual_fusion: true
+  forbid_official_val: true
+  forbid_aic_test: true
+paths:
+  repair_dev: "/home/featurize/aic_rgbtir_phase18_full_bundle/assets/manifests/repair_dev.jsonl"
+  model_cache: "/home/featurize/full_model_cache"
+  output_root: "/home/featurize/aic_cloud/outputs/aic_rgbtir_phase18_q0_real_v1"
+model:
+  model_id: "Qwen/Qwen3-VL-8B-Instruct"
+  revision: "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+  dtype: "bfloat16"
+interface:
+  projected_dimension: 1152
+runtime:
+  seed: 20260812
+  maximum_records: 10
+expected:
+  repair_dev_records: 1024
+  repair_dev_sha256: "B9DFB8C4E47CAD542326BD25D5B2054EA7CADD64E6AA12BA72E2E7B84CD5D1D7"

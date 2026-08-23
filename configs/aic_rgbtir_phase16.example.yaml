@@ -1,0 +1,94 @@
+paths:
+  rgbt_root: "D:/AIC赛题一数据集/03_RGBT_GroundBench/extracted"
+  train_clean_manifest: "../outputs/aic_rgbtir_phase0_v1/manifests/train_clean.jsonl"
+  official_val_manifest: "../outputs/aic_rgbtir_phase0_v1/manifests/val_official.jsonl"
+  manifest_root: "../outputs/aic_rgbtir_phase16_v1/manifests"
+  output_root: "../outputs/aic_rgbtir_phase16_v1"
+  model_cache: "D:/AIC赛题一数据集/04_Model_Cache_Phase15/Qwen3-VL-8B-Instruct"
+  report: "../reports/aic_rgbtir_phase16_repair_validation_2026_08_13.md"
+
+model:
+  model_id: "Qwen/Qwen3-VL-8B-Instruct"
+  revision: "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b"
+  vision_hidden_size: 1152
+  rgb_lora_rank: 0
+  tir_lora_rank: 48
+  lora_alpha: 48.0
+  lora_target_suffixes: ["attn.qkv", "attn.proj"]
+
+expected_assets:
+  config.json:
+    bytes: 1474
+    sha256: "5CD452860DC1E9C29DD71CC3CEF7F39B338B7A40793F7A260655C2D3568F3661"
+  preprocessor_config.json:
+    bytes: 390
+    sha256: "27225450AC9C6529872EE1924FCB0962FF5634834F817040F444118116F4E516"
+  model.safetensors.index.json:
+    bytes: 67759
+    sha256: "520B2E05079402E9468A8701D03D1154D14B2599593AFB6EFFA7FB60C1BFF070"
+  model-00004-of-00004.safetensors:
+    bytes: 2716270024
+    sha256: "0A88B98E9F96270973F567E6A2C103EDE6CCDF915CA3075E21C755604D0377A5"
+
+processor:
+  patch_size: 16
+  spatial_merge_size: 2
+  temporal_patch_size: 2
+  min_pixels: 262144
+  max_pixels: 1310720
+  black_threshold: 3
+  image_mean: [0.5, 0.5, 0.5]
+  image_std: [0.5, 0.5, 0.5]
+
+split:
+  probe_pairs: 4096
+  dev_pairs: 1024
+
+runtime:
+  seed: 20260812
+  minimum_vram_gib: 23.0
+  probe_steps: 4096
+  full_steps: 0
+  checkpoint_fractions: [0.25, 0.50, 0.75, 1.0]
+  teacher_bank_checkpoint_pairs: 25
+  validation_checkpoint_pairs: 25
+  bootstrap_iterations: 2000
+
+loss:
+  temperature: 0.07
+  margin: 0.15
+  roi_expansion: 0.10
+  negative_count: 256
+  same_source_negatives: 128
+  same_condition_negatives: 64
+  relational_anchor_count: 64
+
+optimization:
+  learning_rate: 0.00005
+  weight_decay: 0.01
+  warmup_fraction: 0.05
+  gradient_accumulation: 4
+  max_grad_norm: 1.0
+
+gates:
+  minimum_alignment_improvement: 0.02
+  maximum_subgroup_degradation: 0.05
+  subgroup_minimum_records: 100
+  maximum_r5_drop: 0.005
+  minimum_retrieval_gain: 0.01
+  minimum_effective_rank_vs_base: 0.70
+  minimum_effective_rank_vs_rgb: 0.50
+  maximum_nonpaired_p95_increase: 0.10
+  gate_zero_max_abs_diff_bf16: 0.001
+
+expected:
+  probe_pairs: 4096
+  dev_pairs: 1024
+  official_val_records: 2032
+  official_val_pairs: 1115
+  adapter_tensor_count: 108
+
+r5_retention:
+  "8": 0.6222
+  "16": 0.7826
+  "24": 0.7467

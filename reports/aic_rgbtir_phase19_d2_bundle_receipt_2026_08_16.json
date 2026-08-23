@@ -1,0 +1,15 @@
+{
+  "status": "PHASE_19_D2_CLOUD_BUNDLE_READY",
+  "bundle": "D:\\12525\\Documents\\pytorch\\aic_rgbtir_phase19_d2_cloud_bundle_20260816.zip",
+  "bytes": 761277588,
+  "sha256": "22D9F3CFF9B38E2C548D07D82410B8B46BACC35F5C75A8225452DD268CA23BC9",
+  "zip_entries": 32,
+  "manifest_files": 31,
+  "missing_files": 0,
+  "hash_mismatches": 0,
+  "testzip_bad_entry": null,
+  "teacher_bank_included": true,
+  "d1_selected_adapter_included": true,
+  "official_val_included": false,
+  "claim_boundary": "Phase 1.9-D2 probe package only; no training or AIC platform result."
+}
